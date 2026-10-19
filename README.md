@@ -26,3 +26,9 @@ Open `raid-commander-game/` as the Unity project. It targets Unity `6000.6.6f1`.
 - **AI Navigation:** Not installed yet. In Unity, open **Window > Package Management > Package Manager**, choose **Unity Registry**, search for **AI Navigation** (`com.unity.ai.navigation`), and install a version compatible with the project editor. This supplies NavMesh authoring and runtime navigation components.
 
 The project currently contains Unity's starter scene and template assets. No gameplay has been implemented.
+
+## Generate the playable test arena
+
+After Unity imports the project scripts, run **Raid Commander > Generate Playable Arena** from the editor menu. This idempotently creates or refreshes `Assets/_Game/Scenes/RaidArena.unity`, its shared 3D materials, the Ground/FriendlyUnit/HostileUnit layers, and the first enabled Build Settings scene. Open that scene and press Play.
+
+Use **WASD** or the arrow keys to pan over the ground plane and the **mouse wheel** to zoom. Camera panning is smoothed and follows horizontal ground directions; zoom is orthographic and adjustable in the camera component.
