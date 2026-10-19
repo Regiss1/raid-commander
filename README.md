@@ -31,4 +31,4 @@ The project currently contains Unity's starter scene and template assets. No gam
 
 After Unity imports the project scripts, run **Raid Commander > Generate Playable Arena** from the editor menu. This idempotently creates or refreshes `Assets/_Game/Scenes/RaidArena.unity`, its shared 3D materials, the Ground/FriendlyUnit/HostileUnit layers, and the first enabled Build Settings scene. Open that scene and press Play.
 
-Use **WASD** or the arrow keys to pan over the ground plane and the **mouse wheel** to zoom. Camera panning is smoothed and follows horizontal ground directions; zoom is orthographic and adjustable in the camera component.
+Use **WASD** or the arrow keys to pan over the ground plane and the **mouse wheel** to zoom. Left-click a friendly unit to select it, or press **1** for Tank, **2** for Healer, and **3** for DPS. Clicking elsewhere clears selection. Camera panning is smoothed and follows horizontal ground directions; zoom is orthographic and adjustable in the camera component.

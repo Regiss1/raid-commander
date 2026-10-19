@@ -55,7 +55,7 @@ namespace RaidCommander.EditorTools
             CreatePrimitive(PrimitiveType.Cylinder, "East Column", obstacles.transform,
                 new Vector3(6f, 1.2f, 5f), new Vector3(1.1f, 1.2f, 1.1f), 0, obstacleMaterial);
             CreatePrimitive(PrimitiveType.Cube, "South Cover", obstacles.transform,
-                new Vector3(2f, 0.8f, -7f), new Vector3(5f, 1.6f, 1.5f), 0, obstacleMaterial);
+                new Vector3(4f, 0.8f, -7f), new Vector3(5f, 1.6f, 1.5f), 0, obstacleMaterial);
             CreatePrimitive(PrimitiveType.Cube, "Northwest Cover", obstacles.transform,
                 new Vector3(-10f, 0.9f, 10f), new Vector3(3f, 1.8f, 2f), 0, obstacleMaterial);
 
@@ -70,6 +70,7 @@ namespace RaidCommander.EditorTools
 
             CreateLighting(lighting.transform);
             CreateCamera(arena.transform);
+            UnitSelectionSceneSetup.Apply(scene);
 
             RenderSettings.ambientMode = AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.48f, 0.51f, 0.56f);
@@ -81,7 +82,7 @@ namespace RaidCommander.EditorTools
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Selection.activeGameObject = floor;
+            UnityEditor.Selection.activeGameObject = floor;
             Debug.Log($"Playable 3D arena generated at {ScenePath}. Open it and press Play.");
         }
 
