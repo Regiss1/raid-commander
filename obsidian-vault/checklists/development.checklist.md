@@ -17,7 +17,8 @@
 
 - [x] Implement an elevated, angled orthographic camera controller with ground-plane pan and smooth zoom.
 - [x] Generate the 3D arena, party placeholders, boss, lighting, and obstacles in Unity.
-- [ ] Implement single-unit selection and direct movement orders using 3D raycasts and NavMesh.
+- [x] Implement individual friendly-unit selection with 3D raycasts, role hotkeys, clear-on-empty, and an XZ selection ring.
+- [ ] Implement direct movement orders using 3D raycasts and NavMesh.
 - [ ] Implement autonomous role behavior with explicit player movement overrides.
 - [ ] Add basic health, damage, attacks, healing, and one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.
