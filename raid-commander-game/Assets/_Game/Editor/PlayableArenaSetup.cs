@@ -71,6 +71,7 @@ namespace RaidCommander.EditorTools
             CreateLighting(lighting.transform);
             CreateCamera(arena.transform);
             UnitSelectionSceneSetup.Apply(scene);
+            ArenaMovementSetup.Apply(scene);
 
             RenderSettings.ambientMode = AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.48f, 0.51f, 0.56f);

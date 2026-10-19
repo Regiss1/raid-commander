@@ -8,6 +8,7 @@ This vault holds project context, design notes, architecture planning, and devel
 - `structure/folder.structure.md` describes the current Unity scaffold and planned areas for later growth.
 - `checklists/development.checklist.md` tracks foundation and MVP progress.
 - `systems/` contains dedicated notes describing implemented game systems and their current versions.
+- [Team member movement](systems/team-member-movement.md) documents right-click orders, navigation, and command completion.
 - `prompts/tasks/` contains task prompts and implementation planning.
 - `AGENTS.md` records practices for maintaining this vault.
 
