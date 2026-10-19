@@ -6,6 +6,36 @@ These rules apply to the Unity project in `raid-commander-game/`.
 
 - Read relevant notes in `obsidian-vault/` for project context before changing architecture, scope, or feature plans.
 - Keep the vault aligned with the repository when a task changes project structure, architectural decisions, MVP scope, or feature status.
+- Document every change to a game system in its dedicated `obsidian-vault/systems/<system>.md` note. If the system has no dedicated note yet, create one before finishing the change.
+- Keep each system note's `## Revisions` table current whenever its system changes. Add a dated version and concise summary; list newest revisions first.
+- Use this structure for system notes:
+
+  ```markdown
+  # <System name> v<version>
+
+  **Status:** <planned | in progress | implemented>
+
+  ## Overview
+  <Purpose and responsibilities>
+
+  ## Behavior
+  <Player-facing behavior and controls>
+
+  ## Implementation
+  <Important design and technical details>
+
+  ## Source files
+  - `<path>`
+
+  ## Current scope
+  <Supported behavior and known boundaries>
+
+  ## Revisions
+  | Version | Date (YYYY-MM-DD) | Summary |
+  |---|---|---|
+  | v<version> | YYYY-MM-DD | <Change summary> |
+  ```
+
 - Distinguish implemented behavior from planned direction. Update status/checklists only when the corresponding work is actually present in the Unity project.
 - Treat `obsidian-vault/` as planning and project documentation; Unity implementation remains under `raid-commander-game/`.
 - Preserve existing vault organization and write Markdown as UTF-8. Prefer updating the relevant note over duplicating the same specification across several files.
