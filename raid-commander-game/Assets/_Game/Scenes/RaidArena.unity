@@ -356,7 +356,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 737d2c77e5c64a4a9a5f9e9466ac06b2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Selection.SelectableUnit
   role: 0
 --- !u!1 &408265775
@@ -775,7 +775,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cd4628bfec44458a7e454a9e6c67d37, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.CameraControl.OrthographicArenaCamera
   panSpeed: 16
   panSmoothTime: 0.12
@@ -852,7 +852,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 25a11e3698004bc3acf7a6f4c254925a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Selection.UnitSelectionController
   selectionCamera: {fileID: 540495315}
   raycastMask:
@@ -988,7 +988,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 737d2c77e5c64a4a9a5f9e9466ac06b2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Selection.SelectableUnit
   role: 1
 --- !u!1 &616637961
@@ -1381,7 +1381,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6db61b6642e64cb58cec349822214755, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Selection.SelectionRing
   ringMaterial: {fileID: 2100000, guid: ef75dec4e8fe8124183254e7054ee018, type: 2}
 --- !u!23 &1329361370
@@ -1484,7 +1484,7 @@ Transform:
   m_GameObject: {fileID: 1393168105}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2, y: 0.8, z: -7}
+  m_LocalPosition: {x: 4, y: 0.8, z: -7}
   m_LocalScale: {x: 5, y: 1.6, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1578,6 +1578,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1397465723}
   - component: {fileID: 1397465724}
+  - component: {fileID: 1397465725}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1665,6 +1666,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1397465725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397465722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1566326400
 GameObject:
   m_ObjectHideFlags: 0
@@ -1904,7 +1934,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 737d2c77e5c64a4a9a5f9e9466ac06b2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Selection.SelectableUnit
   role: 2
 --- !u!1 &1802721095
