@@ -1,5 +1,6 @@
 # Obsidian vault practices
 
+- Hard rule: if an impactful clarification is needed, ask the requester (the person sending the prompt) and wait for their answer before implementing work that depends on it. Do not assume an answer. Impactful clarifications can change scope, behavior, architecture, acceptance criteria, or resolve meaningful conflicts or redundancy. Independent work may continue while waiting.
 - Read the relevant notes here before changing project scope, architecture, or feature plans.
 - Keep project notes consistent with the Unity repository when a task changes architecture, folder structure, MVP scope, or feature status.
 - Document every game-system change in a dedicated note under `systems/`. Create `systems/<system-name>.md` when a system does not have a note yet, and update that note whenever the system changes.
