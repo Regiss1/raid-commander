@@ -31,6 +31,7 @@ These rules apply to the Unity project in `raid-commander-game/`.
 
 - Organize code by gameplay feature under `Assets/_Game/Scripts/`.
 - Prefer small, composable `MonoBehaviour` components with clear ownership. Keep domain data and decision logic separate from scene presentation where practical.
+- Keep unit selection and its visual state in the selection feature; selection components must not own movement, combat, or autonomous decision logic.
 - Avoid global managers, inheritance-heavy frameworks, and premature abstractions. Add shared code only when multiple features need it.
 - Keep encounters, abilities, and class definitions data-driven where practical so future user-created content can be supported.
 - Treat mod loading and executable scripting as future work. Do not add a scripting runtime or mod framework until there is a concrete requirement and security model.
