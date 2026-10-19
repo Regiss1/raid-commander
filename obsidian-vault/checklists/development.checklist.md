@@ -9,8 +9,8 @@
 - [x] Confirm Input System setup and record the AI Navigation installation step.
 - [x] Add an idempotent editor utility for the 3D arena, role placeholders, obstacles, layers, and camera controls.
 - [x] Run the editor utility and save the generated arena as the first Build Settings scene.
-- [ ] Open the scene visually and verify camera controls and framing in Play mode.
-- [ ] Install AI Navigation through Unity Package Manager.
+- [x] Open the scene visually and verify camera controls and framing in Play mode.
+- [x] Install AI Navigation through Unity Package Manager.
 - [ ] Decide which Unity template assets and scenes to retain or replace.
 
 ## MVP
@@ -18,7 +18,7 @@
 - [x] Implement an elevated, angled orthographic camera controller with ground-plane pan and smooth zoom.
 - [x] Generate the 3D arena, party placeholders, boss, lighting, and obstacles in Unity.
 - [x] Implement individual friendly-unit selection with 3D raycasts, role hotkeys, clear-on-empty, and an XZ selection ring.
-- [ ] Implement direct movement orders using 3D raycasts and NavMesh.
+- [x] Implement direct movement orders using 3D raycasts and NavMesh, with temporary markers and explicit command completion.
 - [ ] Implement autonomous role behavior with explicit player movement overrides.
 - [ ] Add basic health, damage, attacks, healing, and one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.

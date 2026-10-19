@@ -56,6 +56,8 @@ These rules apply to the Unity project in `raid-commander-game/`.
 - A player order temporarily takes priority over a unit's autonomous role behavior. Keep the distinction between player orders and autonomous decisions explicit in component responsibilities.
 - Ground movement and navigation targets must remain on the XZ plane, with elevation determined by the environment/navigation surface.
 - Prefer NavMesh navigation for unit movement and pathfinding. Use 3D physics raycasts for picking and ground targeting.
+- Party members and bosses are mutually passable: exclude unit layers from navigation baking, disable agent separation/avoidance and unit-to-unit physics collisions, and let movement targeting raycasts pass through unit bodies. Keep their 3D colliders available for selection; solid arena obstacles still block paths.
+- Keep movement command producers separate from each unit's command executor. Define explicit completion, interruption, cancellation, and failure states so manual movement ownership always ends predictably.
 
 ## Code and content architecture
 
