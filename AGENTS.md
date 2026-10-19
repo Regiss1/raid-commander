@@ -2,6 +2,12 @@
 
 These rules apply to the Unity project in `raid-commander-game/`.
 
+## Requester clarification
+
+- Hard rule: before implementing any work that depends on an impactful clarification, ask the requester (the person sending the prompt) and wait for their answer. Do not infer or assume an answer and proceed with dependent implementation.
+- A clarification is impactful when its answer could materially change scope, player-facing behavior, architecture, acceptance criteria, or resolve a meaningful conflict or redundancy in the request.
+- Independent work that does not depend on the clarification may continue while waiting. Once the requester answers, apply that decision and continue implementation.
+
 ## Obsidian vault practices
 
 - Read relevant notes in `obsidian-vault/` for project context before changing architecture, scope, or feature plans.
