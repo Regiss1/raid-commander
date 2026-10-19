@@ -7,13 +7,16 @@
 - [x] Establish the initial `Assets/_Game/` feature-oriented folder scaffold.
 - [x] Document architecture and 3D coordinate/movement conventions.
 - [x] Confirm Input System setup and record the AI Navigation installation step.
+- [x] Add an idempotent editor utility for the 3D arena, role placeholders, obstacles, layers, and camera controls.
+- [x] Run the editor utility and save the generated arena as the first Build Settings scene.
+- [ ] Open the scene visually and verify camera controls and framing in Play mode.
 - [ ] Install AI Navigation through Unity Package Manager.
 - [ ] Decide which Unity template assets and scenes to retain or replace.
 
 ## MVP
 
-- [ ] Create a 3D arena and an elevated, angled orthographic camera.
-- [ ] Add three placeholder party units: Tank, Healer, and DPS, plus one boss.
+- [x] Implement an elevated, angled orthographic camera controller with ground-plane pan and smooth zoom.
+- [x] Generate the 3D arena, party placeholders, boss, lighting, and obstacles in Unity.
 - [ ] Implement single-unit selection and direct movement orders using 3D raycasts and NavMesh.
 - [ ] Implement autonomous role behavior with explicit player movement overrides.
 - [ ] Add basic health, damage, attacks, healing, and one telegraphed boss mechanic.
