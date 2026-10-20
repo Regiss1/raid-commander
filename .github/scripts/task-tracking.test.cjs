@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeId, validateNames, findIssue, createTaskIssue, transition } = require('./task-tracking.cjs');
+const { normalizeId, validateNames, findIssue, createTaskIssue, validateCommitSubject, transition } = require('./task-tracking.cjs');
 
 const sha = 'a'.repeat(40);
 const branchSha = 'b'.repeat(40);
@@ -14,7 +14,7 @@ function taskIssue(overrides = {}) {
   };
 }
 
-function fakeClient({ issues = [taskIssue()], comparison = 'ahead', message = 'T6: ranged attack\n\nTask: T6\nRefs #42', files = [taskName], fail = () => false } = {}) {
+function fakeClient({ issues = [taskIssue()], comparison = 'ahead', message = 'feat(ranged) => Add ranged attack T6  #42', files = [taskName], fail = () => false } = {}) {
   const calls = [];
   return {
     calls, issues,
@@ -132,10 +132,26 @@ test('an unpushed commit or missing branch cannot close an issue', async () => {
   assert.equal(issueWrites(client).length, 0);
 });
 
-test('completion rejects a commit belonging to a different task or issue', async () => {
-  const client = fakeClient({ message: 'Task: T5\nRefs #42' });
-  await assert.rejects(transition(client, approved), /must include Task: T6/);
-  assert.equal(issueWrites(client).length, 0);
+for (const [description, message] of [
+  ['another task', 'feat(ranged) => Add ranged attack T5  #42'],
+  ['another issue', 'feat(ranged) => Add ranged attack T6  #43'],
+  ['another branch suffix', 'feat(base-game) => Add ranged attack T6  #42'],
+  ['unsupported prefix', 'refactor(ranged) => Simplify ranged attack T6  #42'],
+  ['missing description', 'feat(ranged) =>  T6  #42'],
+  ['wrong issue spacing', 'feat(ranged) => Add ranged attack T6 #42'],
+  ['the old trailer-only format', 'T6: ranged attack\n\nTask: T6\nRefs #42'],
+  ['a convention appearing only in the body', 'Some subject\n\nfeat(ranged) => Add ranged attack T6  #42'],
+]) {
+  test(`completion rejects ${description} before issue mutation`, async () => {
+    const client = fakeClient({ message });
+    await assert.rejects(transition(client, approved), /commit subject must use/);
+    assert.equal(issueWrites(client).length, 0);
+  });
+}
+
+test('the final nested branch segment and dotted task ID are used without double T prefixes', () => {
+  assert.doesNotThrow(() => validateCommitSubject('feat(base-game) => Add reactive health bars T5.1  #42', 'feature/sprint-1/base-game', 'T5.1', 42));
+  assert.throws(() => validateCommitSubject('feat(base-game) => Add reactive health bars TT5.1  #42', 'feature/sprint-1/base-game', 'T5.1', 42));
 });
 
 test('completion validates duplicate numbers and issue path in the pushed task files', async () => {
@@ -146,14 +162,16 @@ test('completion validates duplicate numbers and issue path in the pushed task f
   }
 });
 
-test('approved pushed task closes as completed and gets done status', async () => {
-  const client = fakeClient();
-  const result = await transition(client, approved);
-  assert.equal(result.status, 'done');
-  assert.equal(client.issues[0].state, 'closed');
-  assert.equal(client.issues[0].state_reason, 'completed');
-  assert.deepEqual(client.issues[0].labels.map(label => label.name), ['gameplay', 'task:done']);
-});
+for (const [type, description] of [['feat', 'Add ranged attack'], ['refact', 'Simplify ranged attack'], ['fix', 'Correct ranged attack']]) {
+  test(`approved pushed ${type} task closes without requiring legacy trailers`, async () => {
+    const client = fakeClient({ message: `${type}(ranged) => ${description} T6  #42\n\nOptional explanation.` });
+    const result = await transition(client, approved);
+    assert.equal(result.status, 'done');
+    assert.equal(client.issues[0].state, 'closed');
+    assert.equal(client.issues[0].state_reason, 'completed');
+    assert.deepEqual(client.issues[0].labels.map(label => label.name), ['gameplay', 'task:done']);
+  });
+}
 
 test('failed closing never labels a task done', async () => {
   const client = fakeClient({ fail: method => method === 'PATCH' });
