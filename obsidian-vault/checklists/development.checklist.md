@@ -20,7 +20,9 @@
 - [x] Implement individual friendly-unit selection with 3D raycasts, role hotkeys, clear-on-empty, and an XZ selection ring.
 - [x] Implement direct movement orders using 3D raycasts and NavMesh, with temporary markers and explicit command completion.
 - [ ] Implement autonomous role behavior with explicit player movement overrides.
-- [ ] Add basic health, damage, attacks, healing, and one telegraphed boss mechanic.
+- [x] Configure the arena with basic health, melee attacks, healing, and combat event logging.
+- [x] Run combat verification in Play mode.
+- [ ] Add one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.
 - [ ] Playtest for a short, replayable encounter and refine control clarity.
 
