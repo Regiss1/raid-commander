@@ -70,6 +70,7 @@ namespace RaidCommander.EditorTools
 
             CreateLighting(lighting.transform);
             CreateCamera(arena.transform);
+            RangedDpsSceneSetup.EnsureUnit(scene);
             UnitSelectionSceneSetup.Apply(scene);
             ArenaMovementSetup.Apply(scene);
             CombatSceneSetup.Apply(scene);

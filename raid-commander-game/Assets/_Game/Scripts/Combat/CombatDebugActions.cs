@@ -9,6 +9,7 @@ namespace RaidCommander.Combat
         [SerializeField] private CombatUnit tank;
         [SerializeField] private CombatUnit healer;
         [SerializeField] private CombatUnit dps;
+        [SerializeField] private CombatUnit rangedDps;
         [SerializeField] private CombatUnit boss;
 
         public string LastStatus { get; private set; } = "Choose a combat action.";
@@ -36,6 +37,24 @@ namespace RaidCommander.Combat
         }
 
         public void DpsMelee() => TryMelee(dps, "DPS");
+
+        public void RangedDpsAttack()
+        {
+            if (combat == null || rangedDps == null || boss == null)
+            {
+                LastStatus = "Ranged attack unavailable: combat units are not configured.";
+                return;
+            }
+
+            int healthBefore = boss.CurrentHealth;
+            if (!combat.TryRangedAttack(rangedDps, boss))
+            {
+                LastStatus = DescribeRejectedAction(rangedDps, boss, rangedDps.RangedRange, "ranged attack");
+                return;
+            }
+
+            LastStatus = $"Ranged DPS hit the boss for {healthBefore - boss.CurrentHealth}.";
+        }
 
         public void DamageTank()
         {
@@ -81,7 +100,7 @@ namespace RaidCommander.Combat
                 LastStatus = "Reset unavailable: combat system is not configured.";
                 return;
             }
-            combat.ResetSession(new[] { tank, healer, dps, boss });
+            combat.ResetSession(new[] { tank, healer, dps, rangedDps, boss });
             LastStatus = "Unit health and encounter log reset.";
         }
 
@@ -113,7 +132,7 @@ namespace RaidCommander.Combat
             if (action == "heal" && source.Faction != target.Faction)
                 return "No heal: Healer and Tank must be on the same faction.";
             if (action != "heal" && source.Faction == target.Faction)
-                return "No melee attack: source and target must be on opposing factions.";
+                return $"No {action}: source and target must be on opposing factions.";
 
             float distance = PlanarDistance(source.transform.position, target.transform.position);
             if (distance > range)

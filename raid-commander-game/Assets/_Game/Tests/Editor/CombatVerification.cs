@@ -143,6 +143,12 @@ namespace RaidCommander.Verification
                 while (healthChecks.MoveNext()) yield return null;
             }
             finally { (healthChecks as IDisposable)?.Dispose(); }
+            IEnumerator rangedChecks = RangedDpsVerification.Verify();
+            try
+            {
+                while (rangedChecks.MoveNext()) yield return null;
+            }
+            finally { (rangedChecks as IDisposable)?.Dispose(); }
         }
 
         private static void Check(bool condition, string message)

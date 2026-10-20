@@ -40,7 +40,7 @@ Minimum playable encounter
 
 MVP target
 
-# 3
+# 4
 
 Party members
 
@@ -56,7 +56,7 @@ Arena
 
 Boss mechanic
 
-The MVP includes a tank, a healer, a DPS, and a single boss in an arena. Characters are represented by simple capsules or other placeholder models.
+The current prototype party includes a tank, a healer, a melee DPS and a ranged DPS, with a single boss in an arena. Characters are represented by simple capsules or other placeholder models. T6 expanded the original three-member party; attacks are currently tested through debug actions. The autonomous encounter behavior described below remains planned.
 
 The controls should initially support left-click selection, right-click movement, number keys to switch party members, and a single manual ability activated with Q.
 

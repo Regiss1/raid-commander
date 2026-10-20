@@ -63,7 +63,7 @@ namespace RaidCommander.EditorTools
             Physics.SyncTransforms();
             BakeAndSave(surface);
 
-            string[] names = { "Tank", "Healer", "DPS" };
+            string[] names = { "Tank", "Healer", "DPS", "Ranged DPS" };
             for (int i = 0; i < names.Length; i++)
             {
                 GameObject unit = Require(scene, names[i]);

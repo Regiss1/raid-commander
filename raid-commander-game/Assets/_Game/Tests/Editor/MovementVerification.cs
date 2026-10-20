@@ -97,13 +97,14 @@ namespace RaidCommander.Verification
             var tank = GameObject.Find("Tank").GetComponent<UnitMovement>();
             var healer = GameObject.Find("Healer").GetComponent<UnitMovement>();
             var dps = GameObject.Find("DPS").GetComponent<UnitMovement>();
+            var rangedDps = GameObject.Find("Ranged DPS").GetComponent<UnitMovement>();
             var camera = Camera.main;
             var selection = camera.GetComponent<UnitSelectionController>();
             var input = camera.GetComponent<PlayerMovementInput>();
             var marker = GameObject.Find("Destination Marker").GetComponent<DestinationMarker>();
-            UnitMovement[] party = { tank, healer, dps };
-            Check(UnityEngine.Object.FindObjectsByType<UnitMovement>(FindObjectsSortMode.None).Length == 3,
-                "Expected exactly three independent movers.");
+            UnitMovement[] party = { tank, healer, dps, rangedDps };
+            Check(UnityEngine.Object.FindObjectsByType<UnitMovement>(FindObjectsSortMode.None).Length == 4,
+                "Expected exactly four independent movers.");
             foreach (UnitMovement unit in party)
             {
                 Check(unit.GetComponent<NavMeshAgent>().isOnNavMesh, unit.name + " is off the baked NavMesh.");
@@ -191,8 +192,9 @@ namespace RaidCommander.Verification
             Check(tank.GetComponent<NavMeshAgent>().path.corners.Length > 2, "Expected a detour around the central pillar.");
             Check(healer.TryMove(new Vector3(-10, 0, -10), MovementSource.Manual) == MoveResult.Accepted, "Healer move rejected.");
             Check(dps.TryMove(new Vector3(10, 0, -4), MovementSource.Manual) == MoveResult.Accepted, "DPS move rejected.");
-            Vector3[] starts = { tank.transform.position, healer.transform.position, dps.transform.position };
-            bool[] moved = new bool[3];
+            Check(rangedDps.TryMove(new Vector3(-10, 0, -4), MovementSource.Manual) == MoveResult.Accepted, "Ranged DPS move rejected.");
+            Vector3[] starts = { tank.transform.position, healer.transform.position, dps.transform.position, rangedDps.transform.position };
+            bool[] moved = new bool[party.Length];
             Collider[] obstacles = GameObject.Find("Obstacles").GetComponentsInChildren<Collider>();
             double moveDeadline = EditorApplication.timeSinceStartup + 25;
             while (Array.Exists(party, unit => unit.State == MovementState.Moving))
@@ -261,7 +263,8 @@ namespace RaidCommander.Verification
                 && Physics.GetIgnoreLayerCollision(hostileLayer, hostileLayer), "Unit collision settings were not saved.");
             Vector3 bossPosition = GameObject.Find("Raid Boss").transform.position;
             Vector3 crossing = new Vector3(bossPosition.x, 0f, bossPosition.z);
-            Vector3[] crossingStarts = { crossing + Vector3.left * 4, crossing, crossing + Vector3.right * 4 };
+            Vector3[] crossingStarts = { crossing + Vector3.left * 4, crossing, crossing + Vector3.right * 4,
+                crossing + Vector3.back * 4 };
             for (int i = 0; i < party.Length; i++)
             {
                 var agent = party[i].GetComponent<NavMeshAgent>();

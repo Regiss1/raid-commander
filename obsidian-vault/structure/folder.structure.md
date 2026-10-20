@@ -13,6 +13,7 @@ raid-commander-game/
 │   │   │   ├── Input/
 │   │   │   ├── Selection/
 │   │   │   ├── Movement/
+│   │   │   ├── Combat/
 │   │   │   ├── Units/
 │   │   │   ├── Encounters/
 │   │   │   ├── Abilities/
@@ -38,6 +39,8 @@ raid-commander-game/
 ```
 
 The `Scripts` folders are organized by feature. Keep components small and composable. Add subfolders or shared abstractions when real implementation needs them; the scaffold is not a commitment to build every planned system at once.
+
+`Combat/` contains health/state, melee and immediate ranged resolution, combat events/logging, debug command production and the independent ranged tracer. `Data/BaseGame/Units/` holds stats for four party roles and the boss. Arena setup lives in `_Game/Editor/`; `RangedDpsSceneSetup` adds the fourth unit through the existing selection, movement and combat owners without regenerating arena geometry. Integration runners live in `_Game/Tests/Editor/`.
 
 ## World conventions
 

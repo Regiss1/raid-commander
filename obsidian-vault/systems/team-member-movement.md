@@ -1,6 +1,6 @@
-# Team member movement v1.1
+# Team member movement v1.2
 
-**Status:** Implemented in the playable arena.
+**Status:** implemented
 
 ## Overview
 
@@ -8,7 +8,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 
 ## Behavior
 
-- Select Tank, Healer, or DPS, then right-click visible ground to issue a manual move.
+- Select Tank, Healer, Melee DPS, or Ranged DPS, then right-click visible ground to issue a manual move.
 - Camera.ScreenPointToRay and a 3D Physics.Raycast find the actual ground hit. Ground height comes from physics and the NavMesh; Y is never forced to zero.
 - Agents follow paths around the arena's 3D obstacles. Selecting another unit lets the player issue independent orders while existing moves continue.
 - Party members and the boss are mutually passable. Units can cross or share a destination without pushing, blocking, or detouring around one another. Right-click movement targeting passes through unit bodies to the ground; left-click selection still uses their colliders.
@@ -29,6 +29,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - The Humanoid bake profile uses radius 0.7, height 2, and step height 0.4; the surface uses 0.1-unit voxels and a height mesh. Agents retain radius 0.65 and use NoObstacleAvoidance to allow mutual overlap while the baked clearance still protects against walls. Speed is 4.5 and stopping distance is 0.15. Their base offset accounts for the centered capsule pivots so their feet and selection rings remain at ground level.
 - The project's 3D physics collision matrix disables FriendlyUnit/FriendlyUnit, FriendlyUnit/HostileUnit, and HostileUnit/HostileUnit collisions. Body colliders remain enabled for raycast selection. New unit navigation must preserve this passability convention.
 - `ArenaMovementSetup` updates the existing arena and saves the baked asset, preserving its GUID on rebake. The full arena generator also calls this setup.
+- T6 extends the same agent/executor setup to Ranged DPS at speed 4.5. **Configure Ranged DPS** adds the fourth unit to the existing scene and rebakes its current geometry without regenerating the arena or replacing its floor edits.
 
 ## Source files
 
@@ -37,19 +38,23 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - `raid-commander-game/Assets/_Game/Scripts/Movement/DestinationMarker.cs`
 - `raid-commander-game/Assets/_Game/Editor/ArenaMovementSetup.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/MovementVerification.cs`
+- `raid-commander-game/Assets/_Game/Editor/RangedDpsSceneSetup.cs`
+- `raid-commander-game/Assets/_Game/Tests/Editor/RangedDpsVerification.cs`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArena.unity`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArenaNavMesh.asset`
 - `raid-commander-game/ProjectSettings/DynamicsManager.asset`
 
 ## Current scope
 
-V1.1 supports individual orders, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. The Autonomous source is an integration API; role decision logic is future work. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
+V1.2 supports four party members with individual orders, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. The Autonomous source is an integration API; role decision logic is future work. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
 
 Navigation preserves elevation, but the current arena is flat. Multilevel targeting, slope presentation, and more complex terrain still need dedicated level validation. A shared marker shows only the most recent player request; it is feedback rather than a persistent marker for every moving unit.
 
 After editing geometry, run **Raid Commander > Configure Movement and Bake Navigation**. The checked-in scene already references the baked NavMesh asset.
 
 ## Verification
+
+Verified v1.2 on 2026-10-20 in Unity 6000.6.6f1. The movement suite passed with four independent movers, obstacle avoidance, crossing, shared boss destinations, and the existing interruption/failure cases. The ranged suite additionally passed synthetic right-click movement, selection switching, manual-priority rejection, arrival, and movement cancellation on death. Existing floor customization remained intact across repeated setup.
 
 Verified v1.1 on 2026-10-18 in Unity 6000.6.6f1: the automated Play-mode checks passed, and the scene setup completed successfully. Added checks cover crossing movers through an idle teammate and the boss without displacement or detours, all three units completing at the boss's ground position, saved collision settings, retained selection colliders, and movement targeting through unit bodies. Existing static-obstacle avoidance checks also passed.
 
@@ -59,5 +64,6 @@ Verified v1.1 on 2026-10-18 in Unity 6000.6.6f1: the automated Play-mode checks 
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.2 | 2026-10-20 | Extended setup and regression checks to four party members; verified Ranged DPS movement and preserved customized arena geometry. |
 | v1.1 | 2026-10-18 | Made party members and boss mutually passable; removed unit separation, unit collisions, boss bake obstruction, and unit blocking of movement targeting. Added crossing and shared-destination checks. |
 | v1 | 2026-10-18 | Added baked 3D navigation, individual right-click orders, destination feedback, unreachable-target rejection, and movement ownership with explicit command outcomes. |

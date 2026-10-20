@@ -28,14 +28,16 @@ namespace RaidCommander.EditorTools
             GameObject tankObject = FindByName(scene, "Tank");
             GameObject healerObject = FindByName(scene, "Healer");
             GameObject dpsObject = FindByName(scene, "DPS");
+            GameObject rangedDpsObject = FindByName(scene, "Ranged DPS");
             GameObject cameraObject = FindByName(scene, "Main Camera");
 
-            if (tankObject == null || healerObject == null || dpsObject == null || cameraObject == null)
-                throw new System.InvalidOperationException("Arena must contain Tank, Healer, DPS, and Main Camera objects before selection is configured.");
+            if (tankObject == null || healerObject == null || dpsObject == null || rangedDpsObject == null || cameraObject == null)
+                throw new System.InvalidOperationException("Arena must contain Tank, Healer, DPS, Ranged DPS, and Main Camera objects before selection is configured.");
 
             SelectableUnit tank = ConfigureUnit(tankObject, PartyRole.Tank);
             SelectableUnit healer = ConfigureUnit(healerObject, PartyRole.Healer);
             SelectableUnit dps = ConfigureUnit(dpsObject, PartyRole.Dps);
+            SelectableUnit rangedDps = ConfigureUnit(rangedDpsObject, PartyRole.RangedDps);
             Material ringMaterial = GetOrCreateRingMaterial();
             SelectionRing ring = ConfigureRing(scene, ringMaterial);
 
@@ -49,6 +51,7 @@ namespace RaidCommander.EditorTools
             serializedController.FindProperty("tank").objectReferenceValue = tank;
             serializedController.FindProperty("healer").objectReferenceValue = healer;
             serializedController.FindProperty("dps").objectReferenceValue = dps;
+            serializedController.FindProperty("rangedDps").objectReferenceValue = rangedDps;
             serializedController.FindProperty("selectionRing").objectReferenceValue = ring;
             serializedController.FindProperty("raycastDistance").floatValue = 200f;
             serializedController.ApplyModifiedPropertiesWithoutUndo();

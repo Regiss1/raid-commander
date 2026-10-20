@@ -108,6 +108,7 @@ namespace RaidCommander.EditorTools
                 RaidCommander.Selection.PartyRole.Tank => new Color(0.08f, 0.208f, 0.38f, 1f),
                 RaidCommander.Selection.PartyRole.Healer => new Color(0.088f, 0.328f, 0.192f, 1f),
                 RaidCommander.Selection.PartyRole.Dps => new Color(0.392f, 0.26f, 0.072f, 1f),
+                RaidCommander.Selection.PartyRole.RangedDps => new Color(0f, 0.36f, 0.4f, 1f),
                 _ => new Color(0.08f, 0.08f, 0.08f, 1f)
             };
             var outline = background.GetComponent<UnityEngine.UI.Outline>();
