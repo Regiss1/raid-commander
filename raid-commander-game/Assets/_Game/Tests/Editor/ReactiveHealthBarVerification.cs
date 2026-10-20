@@ -25,12 +25,14 @@ namespace RaidCommander.Verification
             CombatUnit healer = GameObject.Find("Healer").GetComponent<CombatUnit>();
             CombatUnit dps = GameObject.Find("DPS").GetComponent<CombatUnit>();
             CombatUnit boss = GameObject.Find("Raid Boss").GetComponent<CombatUnit>();
-            CombatUnit[] units = { tank, healer, dps, boss };
+            CombatUnit rangedDps = GameObject.Find("Ranged DPS").GetComponent<CombatUnit>();
+            CombatUnit[] units = { tank, healer, dps, rangedDps, boss };
             var combat = UnityEngine.Object.FindAnyObjectByType<CombatSystem>();
             var actions = UnityEngine.Object.FindAnyObjectByType<CombatDebugActions>();
             HealthBarBinding tankBar = tank.GetComponentInChildren<HealthBarBinding>();
             HealthBarBinding healerBar = healer.GetComponentInChildren<HealthBarBinding>();
             HealthBarBinding dpsBar = dps.GetComponentInChildren<HealthBarBinding>();
+            HealthBarBinding rangedBar = rangedDps.GetComponentInChildren<HealthBarBinding>();
             HealthBarBinding bossBar = GameObject.Find("Boss Status HUD").GetComponent<HealthBarBinding>();
             Camera camera = Camera.main;
             var cameraController = camera.GetComponent<OrthographicArenaCamera>();
@@ -46,7 +48,7 @@ namespace RaidCommander.Verification
             try
             {
                 actions.ResetEncounter();
-                foreach (HealthBarBinding bar in new[] { tankBar, healerBar, dpsBar, bossBar }) AssertView(bar);
+                foreach (HealthBarBinding bar in new[] { tankBar, healerBar, dpsBar, rangedBar, bossBar }) AssertView(bar);
                 Check(boss.GetComponentInChildren<WorldHealthBar>(true) == null, "Boss has a duplicate world-space bar.");
                 Check(bossBar.GetComponent<Canvas>().renderMode == RenderMode.ScreenSpaceOverlay
                     && bossBar.transform.parent == null, "Boss HUD must be an independent overlay.");

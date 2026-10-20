@@ -37,6 +37,8 @@ namespace RaidCommander.EditorTools
                 GetOrCreateStats("DpsCombatStats", 100, 20, 20, 2.5f, 4f));
             CombatUnit boss = ConfigureUnit(Require(scene, "Raid Boss"), 4, CombatFaction.Hostile, camera,
                 GetOrCreateStats("BossCombatStats", 500, 30, 0, 3.5f, 4f), attachWorldHealthBar: false);
+            CombatUnit rangedDps = ConfigureUnit(Require(scene, "Ranged DPS"), 5, CombatFaction.Friendly, camera,
+                GetOrCreateStats("RangedDpsCombatStats", 100, 20, 0, 2.5f, 18f));
             ConfigureBossHud(scene, boss);
 
             GameObject serviceObject = FindOrCreate(scene, "Combat Services");
@@ -46,6 +48,7 @@ namespace RaidCommander.EditorTools
             combatSettings.FindProperty("logService").objectReferenceValue = log;
             combatSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(combat);
+            RangedDpsSceneSetup.ConfigureTracer(rangedDps, combat);
 
             GameObject panelObject = FindOrCreate(scene, "Combat Debug Panel");
             var panel = GetOrAdd<CombatDebugPanel>(panelObject);
@@ -55,6 +58,7 @@ namespace RaidCommander.EditorTools
             actionSettings.FindProperty("tank").objectReferenceValue = tank;
             actionSettings.FindProperty("healer").objectReferenceValue = healer;
             actionSettings.FindProperty("dps").objectReferenceValue = dps;
+            actionSettings.FindProperty("rangedDps").objectReferenceValue = rangedDps;
             actionSettings.FindProperty("boss").objectReferenceValue = boss;
             actionSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(actions);
@@ -65,6 +69,7 @@ namespace RaidCommander.EditorTools
             panelSettings.FindProperty("tank").objectReferenceValue = tank;
             panelSettings.FindProperty("healer").objectReferenceValue = healer;
             panelSettings.FindProperty("dps").objectReferenceValue = dps;
+            panelSettings.FindProperty("rangedDps").objectReferenceValue = rangedDps;
             panelSettings.FindProperty("boss").objectReferenceValue = boss;
             panelSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(panel);

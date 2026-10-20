@@ -16,7 +16,8 @@ namespace RaidCommander.Combat
         SpellPeriodicHeal,
         AuraApplied,
         AuraRemoved,
-        UnitDied
+        UnitDied,
+        RangedDamage
     }
 
     [Flags]

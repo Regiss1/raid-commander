@@ -7,7 +7,7 @@ Raid Commander is a single-player, 3D top-down raid simulator built with Unity 6
 The first playable encounter is intentionally small:
 
 - One arena and one boss encounter.
-- Three party units: Tank, Healer, and DPS.
+- Four party units: Tank, Healer, Melee DPS, and Ranged DPS.
 - Autonomous role behavior, with player selection and movement orders that override autonomous movement.
 - A single boss mechanic, basic combat, and clear victory/defeat outcomes.
 - Placeholder 3D models are sufficient for the first iteration.
@@ -31,7 +31,7 @@ Open `Assets/_Game/Scenes/RaidArena.unity` to try camera controls, individual se
 
 After Unity imports the project scripts, run **Raid Commander > Generate Playable Arena** from the editor menu. This idempotently creates or refreshes `Assets/_Game/Scenes/RaidArena.unity`, its shared 3D materials, the Ground/FriendlyUnit/HostileUnit layers, and the first enabled Build Settings scene. Open that scene and press Play.
 
-Use **WASD** or the arrow keys to pan over the ground plane and the **mouse wheel** to zoom. Left-click a friendly unit to select it, or press **1** for Tank, **2** for Healer, and **3** for DPS. Clicking elsewhere clears selection. Camera panning is smoothed and follows horizontal ground directions; zoom is orthographic and adjustable in the camera component.
+Use **WASD** or the arrow keys to pan over the ground plane and the **mouse wheel** to zoom. Left-click a friendly unit to select it, or press **1** for Tank, **2** for Healer, **3** for Melee DPS, and **4** for the cyan Ranged DPS. Clicking elsewhere clears selection. Camera panning is smoothed and follows horizontal ground directions; zoom is orthographic and adjustable in the camera component.
 
 **Right-click visible ground** to move the selected unit along the NavMesh. Each unit continues its own move when you change selection. A new valid order interrupts the current order. A green destination ring confirms an accepted order; a red ring marks a rejected ground or obstacle click. Markers disappear after 1.25 seconds. Rejected destinations leave the current move intact.
 
@@ -39,4 +39,8 @@ After editing arena geometry, use **Raid Commander > Configure Movement and Bake
 
 Party members and the boss can pass through each other and share destinations. Movement clicks pass through their bodies to the ground; solid arena obstacles still block paths.
 
-For the command API, completion states, and current limits, see [team member movement v1.1](obsidian-vault/systems/team-member-movement.md). Run **Raid Commander > Verify Movement in Play Mode** from Edit mode to repeat the movement checks; the verification exits Play mode when finished.
+For the command API, completion states, and current limits, see [team member movement v1.2](obsidian-vault/systems/team-member-movement.md). Run **Raid Commander > Verify Movement in Play Mode** from Edit mode to repeat the four-unit movement checks; the verification exits Play mode when finished.
+
+Use **Ranged: Ranged DPS to Boss** in the combat debug panel for an immediate ranged attack and brief cyan tracer. The boss is the debug attack target; party selection does not change it. Ranged DPS starts with 100 health, 20 damage and an 18-unit attack range. Existing melee, healing, damage and reset buttons remain available; **F8** hides/shows the panel. Combat is still triggered through debug buttons; autonomous attacks and right-click attacks are future work.
+
+**Raid Commander > Configure Ranged DPS** updates the open arena with all four party units and their selection, movement, combat and health wiring while preserving its geometry. The saved scene is already configured. **Verify Ranged DPS in Play Mode** runs the combined combat, reactive health and ranged checks. See [combat and event logging](obsidian-vault/systems/combat-and-logging.md).

@@ -23,6 +23,7 @@
 - [x] Configure the arena with basic health, melee attacks, healing, and combat event logging.
 - [x] Run combat verification in Play mode.
 - [x] Add reactive party and boss health bars, outlined boss health values, and verify notifications and responsive layouts.
+- [x] Add cyan Ranged DPS, selection hotkey 4, immediate boss-targeted debug ranged attacks, tracer feedback and reactive health; verify four-unit movement and combat regressions (T6; requester-approved).
 - [ ] Add one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.
 - [ ] Playtest for a short, replayable encounter and refine control clarity.

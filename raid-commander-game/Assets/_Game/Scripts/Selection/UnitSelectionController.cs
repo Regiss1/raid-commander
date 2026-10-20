@@ -11,6 +11,7 @@ namespace RaidCommander.Selection
         [SerializeField] private SelectableUnit tank;
         [SerializeField] private SelectableUnit healer;
         [SerializeField] private SelectableUnit dps;
+        [SerializeField] private SelectableUnit rangedDps;
         [SerializeField] private SelectionRing selectionRing;
         [SerializeField, Min(1f)] private float raycastDistance = 200f;
 
@@ -18,6 +19,7 @@ namespace RaidCommander.Selection
         private InputAction tankAction;
         private InputAction healerAction;
         private InputAction dpsAction;
+        private InputAction rangedDpsAction;
 
         public SelectableUnit SelectedUnit { get; private set; }
         public event Action<SelectableUnit> SelectionChanged;
@@ -31,6 +33,7 @@ namespace RaidCommander.Selection
             tankAction = new InputAction("Select Tank", InputActionType.Button, "<Keyboard>/1");
             healerAction = new InputAction("Select Healer", InputActionType.Button, "<Keyboard>/2");
             dpsAction = new InputAction("Select DPS", InputActionType.Button, "<Keyboard>/3");
+            rangedDpsAction = new InputAction("Select Ranged DPS", InputActionType.Button, "<Keyboard>/4");
         }
 
         private void OnEnable()
@@ -39,6 +42,7 @@ namespace RaidCommander.Selection
             tankAction?.Enable();
             healerAction?.Enable();
             dpsAction?.Enable();
+            rangedDpsAction?.Enable();
         }
 
         private void OnDisable()
@@ -47,6 +51,7 @@ namespace RaidCommander.Selection
             tankAction?.Disable();
             healerAction?.Disable();
             dpsAction?.Disable();
+            rangedDpsAction?.Disable();
         }
 
         private void OnDestroy()
@@ -55,6 +60,7 @@ namespace RaidCommander.Selection
             tankAction?.Dispose();
             healerAction?.Dispose();
             dpsAction?.Dispose();
+            rangedDpsAction?.Dispose();
         }
 
         private void Update()
@@ -68,6 +74,8 @@ namespace RaidCommander.Selection
                 Select(healer);
             else if (dpsAction.WasPressedThisFrame())
                 Select(dps);
+            else if (rangedDpsAction.WasPressedThisFrame())
+                Select(rangedDps);
         }
 
         public void Select(SelectableUnit unit)

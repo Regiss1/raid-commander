@@ -6,7 +6,8 @@ namespace RaidCommander.Selection
     {
         Tank,
         Healer,
-        Dps
+        Dps,
+        RangedDps
     }
 
     [DisallowMultipleComponent]

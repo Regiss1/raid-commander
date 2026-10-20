@@ -1,4 +1,4 @@
-# Reactive health bars v1.3
+# Reactive health bars v1.4
 
 **Status:** implemented
 
@@ -9,7 +9,7 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 ## Behavior
 
 - Party members have independent world-space bars above their models. A configurable world offset follows movement, the bars face the camera, and projection compensation keeps them readable during zoom.
-- Party bars have a thin dark outline in their role color: blue for Tank, green for Healer, and orange for DPS. The outline surrounds the complete bar, including its missing-health region.
+- Party bars have a thin dark outline in their role color: blue for Tank, green for Healer, orange for Melee DPS, and cyan for Ranged DPS. The outline surrounds the complete bar, including its missing-health region.
 - One boss HUD stays at the top center of the screen. The percentage appears on the left, current / maximum health on the right, and `Boss` below the bar.
 - Percentages use whole numbers. Health values use whole numbers with comma thousands separators, such as `7,500 / 10,000`.
 - Damage, healing, death, maximum health changes, and resets update the fill and text together. Re-enabling a bar immediately refreshes it.
@@ -36,12 +36,15 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 - `raid-commander-game/Assets/_Game/Editor/HealthBarSceneAssets.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/ReactiveHealthBarVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/CombatVerification.cs`
+- `raid-commander-game/Assets/_Game/Tests/Editor/RangedDpsVerification.cs`
 - `raid-commander-game/Assets/_Game/Art/UI/HealthBars/`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArena.unity`
 
 ## Current scope
 
-Supports three party bars and one active boss HUD. Party bars have no text. Floating numbers, resource bars, shields, animations and multiple boss HUDs remain outside this task.
+Supports four party bars and one active boss HUD. Party bars have no text. Floating numbers, resource bars, shields, animations and multiple boss HUDs remain outside this task.
+
+T6 reuses `HealthBarBinding` and `WorldHealthBar` for the fourth unit. Play-mode checks passed for ranged damage on the boss HUD and damage, healing, death, reset and movement on the Ranged DPS bar. The existing five-resolution HUD suite passed, and the four-unit Game view was inspected at orthographic sizes 8, 20 and 30. Boss text retains the two-pixel outline convention.
 
 The updated `RaidArena.unity` scene and shared TMP assets are configured and saved. Use **Raid Commander > Configure Combat and Logging** to reapply setup, and **Raid Commander > Verify Reactive Health Bars in Play Mode** to run combat and health bar integration checks.
 
@@ -57,6 +60,7 @@ The v1.3 role outlines were visually checked in Play Mode on all three party bar
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.4 | 2026-10-20 | Added the fourth reactive party bar with a cyan role outline; verified ranged damage, healing/death/reset and camera integration. |
 | v1.3 | 2026-10-20 | Added thin dark blue, green and orange party bar outlines using the existing party roles. |
 | v1.2 | 2026-10-20 | Replaced rounded button fills with a solid rectangular sprite and removed insets that exposed dark bar borders. |
 | v1.1 | 2026-10-20 | Added scale-aware boss letter spacing so adjacent outlines do not cover characters. |

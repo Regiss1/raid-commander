@@ -23,6 +23,17 @@ namespace RaidCommander.Combat
             return true;
         }
 
+        public bool TryRangedAttack(CombatUnit source, CombatUnit target)
+        {
+            if (!CanActOn(source, target) || source.Faction == target.Faction
+                || PlanarDistance(source.transform.position, target.transform.position) > source.RangedRange)
+                return false;
+
+            source.SetTarget(target);
+            FaceTarget(source, target);
+            return ApplyDamage(source, target, source.BasicDamage, CombatEventType.RangedDamage) > 0;
+        }
+
         public bool TryHeal(CombatUnit source, CombatUnit target)
         {
             if (!CanActOn(source, target) || source.Faction != target.Faction
