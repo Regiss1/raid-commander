@@ -1,10 +1,12 @@
-# Combat and event logging v1.2
+# Combat and event logging v1.3
 
 **Status:** implemented
 
 ## Overview
 
 Combat units own health, faction, stable encounter identifiers, target references, and configurable basic combat values. `CombatSystem` validates requests, applies health changes, and publishes resolved outcomes. `CombatLogService` records outcomes for the current encounter without affecting gameplay.
+
+Reactive presentation, boss numerical values and outlined text are documented in [Reactive health bars](health-bars.md).
 
 ## Behavior
 
@@ -16,7 +18,7 @@ Combat units own health, faction, stable encounter identifiers, target reference
 
 ## Implementation
 
-- `CombatUnit` stores faction, encounter ID, health, target, and basic values. `CombatSceneSetup` creates and assigns per-unit `CombatStatsDefinition` ScriptableObject assets.
+- `CombatUnit` stores faction, encounter ID, runtime health, target, and basic values. Stats supply initial maximum health; `SetMaximumHealth` preserves current health, clamps it to the cap and publishes `HealthChanged`. The component has no UI references. `CombatSceneSetup` creates and assigns per-unit `CombatStatsDefinition` ScriptableObject assets.
 - `CombatSystem` validates faction, range, and alive state, applies effective health changes, then notifies C# event subscribers and its optional log service. Logging is optional and has no gameplay callbacks.
 - `CombatLogEntry` is an immutable value type containing encounter-local sequence, elapsed session time, event type, stable IDs, effective amounts, optional spell ID, and flags. The schema includes future event types, while runtime publishes only `SwingDamage`, `SpellHeal`, and `UnitDied` so far.
 - `CombatLogService` stores up to 1,000 entries by default, removes the oldest at capacity, exposes read-only history, and resets sequence and timestamp origin for a new session.
@@ -46,7 +48,7 @@ Combat units own health, faction, stable encounter identifiers, target reference
 
 Basic resolved melee damage, basic healing, health capping, death, target/faction checks, planar range, facing, health presentation, and in-memory event logging are implemented. There is no autonomous combat behavior, boss attack, armor, critical calculation, shields, periodic effects, casting, AoE, encounter result flow, or persistence. To configure a generated arena, use **Raid Commander > Configure Combat and Logging**. To verify combat behavior, use **Raid Commander > Verify Combat in Play Mode**. In Play mode, click the debug panel buttons; use **Damage Tank (Boss)** before **Heal: Healer to Tank** to see effective healing; press F8 to hide or show the panel.
 
-The boss HUD setup has been applied and saved in `RaidArena.unity` through Unity CLI and the running Editor's Pipeline connection. Live inspection confirmed a scene-root `ScreenSpaceOverlay` canvas, the label `Boss`, a reference to the boss combat unit, and removal of its world-space bar. The setup uses Unity 6's built-in `LegacyRuntime.ttf` font. Script compilation completed without errors, and `CombatVerification.Begin()` completed in Play mode with `COMBAT VERIFY PASS: all combat checks passed`.
+The boss HUD setup has been applied and saved in `RaidArena.unity` through Unity CLI and the running Editor's Pipeline connection. Live inspection confirmed a scene-root `ScreenSpaceOverlay` canvas, the label `Boss`, a reference to the boss combat unit, and removal of its world-space bar. Task T5.1 replaced legacy UI text with outlined TMP text and moved both party and boss fills onto `HealthBarBinding`. Script compilation completed without errors. `CombatVerification.Begin()` now runs the combat checks and the reactive health bar suite; both passed in Play mode.
 
 Unity Pipeline `0.8.0-exp.1` supports this workflow from Codex CLI. In a restricted Codex command sandbox, Editor discovery and localhost access can fail even while the Editor is running. Running Unity CLI commands with approved execution outside that sandbox successfully discovers and controls this project's Editor; switching to the Codex app is unnecessary.
 
@@ -54,6 +56,7 @@ Unity Pipeline `0.8.0-exp.1` supports this workflow from Codex CLI. In a restric
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.3 | 2026-10-20 | Removed UI ownership from combat units, added explicit maximum-health notifications and verified shared reactive health bars alongside existing combat behavior. |
 | v1.2 | 2026-10-19 | Applied and saved the fixed boss HUD with its name below the bar; confirmed setup and passed combat verification through Unity Pipeline. |
 | v1.1 | 2026-10-19 | Added debug action feedback and a boss damage action to make healing testable from the panel. |
 | v1 | 2026-10-19 | Added basic combat resolution, immutable encounter log entries, bounded log history, health bars, debug actions, and a Play-mode verification runner. |

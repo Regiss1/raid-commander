@@ -22,6 +22,7 @@
 - [ ] Implement autonomous role behavior with explicit player movement overrides.
 - [x] Configure the arena with basic health, melee attacks, healing, and combat event logging.
 - [x] Run combat verification in Play mode.
+- [x] Add reactive party and boss health bars, outlined boss health values, and verify notifications and responsive layouts.
 - [ ] Add one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.
 - [ ] Playtest for a short, replayable encounter and refine control clarity.
