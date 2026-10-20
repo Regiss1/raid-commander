@@ -9,6 +9,7 @@ This vault holds project context, design notes, architecture planning, and devel
 - `checklists/development.checklist.md` tracks foundation and MVP progress.
 - `systems/` contains dedicated notes describing implemented game systems and their current versions.
 - [Team member movement](systems/team-member-movement.md) documents right-click orders, navigation, and command completion.
+- [Combat and event logging](systems/combat-and-logging.md) documents basic health changes and encounter-scoped combat events.
 - `prompts/tasks/` contains task prompts and implementation planning.
 - `AGENTS.md` records practices for maintaining this vault.
 
