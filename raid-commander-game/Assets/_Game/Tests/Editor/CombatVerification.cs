@@ -149,6 +149,12 @@ namespace RaidCommander.Verification
                 while (rangedChecks.MoveNext()) yield return null;
             }
             finally { (rangedChecks as IDisposable)?.Dispose(); }
+            IEnumerator sightChecks = LineOfSightVerification.Verify();
+            try
+            {
+                while (sightChecks.MoveNext()) yield return null;
+            }
+            finally { (sightChecks as IDisposable)?.Dispose(); }
         }
 
         private static void Check(bool condition, string message)

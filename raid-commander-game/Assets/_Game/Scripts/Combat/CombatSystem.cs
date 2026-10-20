@@ -3,10 +3,14 @@ using UnityEngine;
 
 namespace RaidCommander.Combat
 {
+    public enum CombatActionFailure { None, InvalidRequest, LineOfSight, NoEffect }
+
     /// <summary>Validates combat requests, applies effective results, then publishes outcomes.</summary>
     public sealed class CombatSystem : MonoBehaviour
     {
         [SerializeField] private CombatLogService logService;
+        [SerializeField] private Transform obstacleRoot;
+        private readonly CombatLineOfSight lineOfSight = new CombatLineOfSight();
         public event Action<ResolvedCombatEvent> EventResolved;
 
         public CombatLogService LogService => logService;
@@ -23,23 +27,44 @@ namespace RaidCommander.Combat
             return true;
         }
 
-        public bool TryRangedAttack(CombatUnit source, CombatUnit target)
+        public bool TryRangedAttack(CombatUnit source, CombatUnit target) => TryRangedAttack(source, target, out _);
+
+        public bool TryRangedAttack(CombatUnit source, CombatUnit target, out CombatActionFailure failure)
         {
+            failure = CombatActionFailure.InvalidRequest;
             if (!CanActOn(source, target) || source.Faction == target.Faction
                 || PlanarDistance(source.transform.position, target.transform.position) > source.RangedRange)
                 return false;
 
+            if (!lineOfSight.IsClear(obstacleRoot, source.transform.position, target.transform.position))
+            {
+                failure = CombatActionFailure.LineOfSight;
+                return false;
+            }
+
             source.SetTarget(target);
             FaceTarget(source, target);
-            return ApplyDamage(source, target, source.BasicDamage, CombatEventType.RangedDamage) > 0;
+            bool applied = ApplyDamage(source, target, source.BasicDamage, CombatEventType.RangedDamage) > 0;
+            failure = applied ? CombatActionFailure.None : CombatActionFailure.NoEffect;
+            return applied;
         }
 
-        public bool TryHeal(CombatUnit source, CombatUnit target)
+        public bool TryHeal(CombatUnit source, CombatUnit target) => TryHeal(source, target, out _);
+
+        public bool TryHeal(CombatUnit source, CombatUnit target, out CombatActionFailure failure)
         {
+            failure = CombatActionFailure.InvalidRequest;
             if (!CanActOn(source, target) || source.Faction != target.Faction
                 || PlanarDistance(source.transform.position, target.transform.position) > source.RangedRange)
                 return false;
 
+            if (!lineOfSight.IsClear(obstacleRoot, source.transform.position, target.transform.position))
+            {
+                failure = CombatActionFailure.LineOfSight;
+                return false;
+            }
+
+            failure = CombatActionFailure.None;
             source.SetTarget(target);
             FaceTarget(source, target);
             int effective = target.ApplyHealing(source.BasicHealing);

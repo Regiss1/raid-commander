@@ -3974,6 +3974,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Combat.CombatSystem
   logService: {fileID: 1443734132}
+  obstacleRoot: {fileID: 666808806}
 --- !u!114 &1443734132
 MonoBehaviour:
   m_ObjectHideFlags: 0

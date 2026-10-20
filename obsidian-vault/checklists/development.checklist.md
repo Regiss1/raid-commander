@@ -24,6 +24,7 @@
 - [x] Run combat verification in Play mode.
 - [x] Add reactive party and boss health bars, outlined boss health values, and verify notifications and responsive layouts.
 - [x] Add cyan Ranged DPS, selection hotkey 4, immediate boss-targeted debug ranged attacks, tracer feedback and reactive health; verify four-unit movement and combat regressions (T6; requester-approved).
+- [x] Validate ranged/healing line of sight against obstacle footprints regardless of height, with debug-only failure feedback and verified unchanged health/events on rejection (T6.1; requester-approved).
 - [ ] Add one telegraphed boss mechanic.
 - [ ] Add encounter victory/defeat and restart flow.
 - [ ] Playtest for a short, replayable encounter and refine control clarity.
