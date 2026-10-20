@@ -1,0 +1,61 @@
+name: Task lifecycle
+run-name: Task ${{ inputs.task }} to ${{ inputs.status }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task identifier, such as T6 or T5.1'
+        type: string
+        required: true
+      status:
+        description: 'Requested issue status'
+        type: choice
+        options: [planned, in-progress, awaiting-review, done]
+        required: true
+      approval:
+        description: 'For done only: OK followed by the task identifier, e.g. OK T6'
+        type: string
+        required: false
+      commit:
+        description: 'For done only: full approved and pushed commit SHA'
+        type: string
+        required: false
+      branch:
+        description: 'For done only: branch containing the pushed commit'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: task-lifecycle-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  transition:
+    runs-on: ubuntu-latest
+    steps:
+      # Execute workflow code from the default branch, not a submitted task branch.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Update the task issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TASK: ${{ inputs.task }}
+          STATUS: ${{ inputs.status }}
+          APPROVAL: ${{ inputs.approval }}
+          COMMIT: ${{ inputs.commit }}
+          BRANCH: ${{ inputs.branch }}
+        run: >-
+          node .github/scripts/task-tracking.cjs transition
+          --repo "$GITHUB_REPOSITORY" --task "$TASK" --status "$STATUS"
+          --approval "$APPROVAL" --commit "$COMMIT" --branch "$BRANCH"
