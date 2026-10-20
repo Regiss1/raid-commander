@@ -1,5 +1,6 @@
 using RaidCommander.Combat;
 using RaidCommander.UI;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -85,18 +86,14 @@ namespace RaidCommander.EditorTools
             settings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(unit);
 
-            WorldHealthBar bar;
             if (attachWorldHealthBar)
-                bar = ConfigureHealthBar(target, camera);
+                ConfigureHealthBar(target, camera, unit);
             else
             {
                 Transform existingBar = target.transform.Find("World Health Bar");
                 if (existingBar != null)
                     Object.DestroyImmediate(existingBar.gameObject);
-                bar = null;
             }
-            settings.FindProperty("healthBar").objectReferenceValue = bar;
-            settings.ApplyModifiedPropertiesWithoutUndo();
             return unit;
         }
 
@@ -120,51 +117,65 @@ namespace RaidCommander.EditorTools
             barRect.anchorMin = new Vector2(0.5f, 1f);
             barRect.anchorMax = new Vector2(0.5f, 1f);
             barRect.pivot = new Vector2(0.5f, 1f);
-            barRect.anchoredPosition = new Vector2(0f, -22f);
-            barRect.sizeDelta = new Vector2(420f, 24f);
+            barRect.anchoredPosition = new Vector2(0f, -20f);
+            barRect.sizeDelta = new Vector2(760f, 32f);
 
             Image fill = FindOrCreateImage(background.transform, "Fill", new Color(0.75f, 0.12f, 0.16f, 1f));
             RectTransform fillRect = fill.rectTransform;
             fillRect.anchorMin = Vector2.zero;
             fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = new Vector2(2f, 2f);
-            fillRect.offsetMax = new Vector2(-2f, -2f);
-            fill.type = Image.Type.Filled;
-            fill.fillMethod = Image.FillMethod.Horizontal;
-            fill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            HealthBarSceneAssets.ConfigureFill(fill);
 
-            Text nameLabel = FindOrCreateText(hudObject.transform, "Boss Name", "Boss");
+            var percentage = HealthBarSceneAssets.ConfigureText(background.transform, "Health Percentage", "100%",
+                TextAlignmentOptions.MidlineLeft);
+            SetTextRect(percentage.rectTransform, Vector2.zero, new Vector2(0.25f, 1f));
+            var healthValues = HealthBarSceneAssets.ConfigureText(background.transform, "Health Values",
+                boss.MaximumHealth.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) + " / "
+                + boss.MaximumHealth.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),
+                TextAlignmentOptions.MidlineRight);
+            SetTextRect(healthValues.rectTransform, new Vector2(0.25f, 0f), Vector2.one);
+
+            var nameLabel = HealthBarSceneAssets.ConfigureText(hudObject.transform, "Boss Name", "Boss",
+                TextAlignmentOptions.Center);
             RectTransform nameRect = nameLabel.rectTransform;
             nameRect.anchorMin = new Vector2(0.5f, 1f);
             nameRect.anchorMax = new Vector2(0.5f, 1f);
             nameRect.pivot = new Vector2(0.5f, 1f);
-            nameRect.anchoredPosition = new Vector2(0f, -50f);
-            nameRect.sizeDelta = new Vector2(420f, 26f);
-            nameLabel.alignment = TextAnchor.MiddleCenter;
-            nameLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            nameLabel.fontSize = 20;
-            nameLabel.fontStyle = FontStyle.Bold;
-            nameLabel.color = Color.white;
-            nameLabel.text = "Boss";
+            nameRect.anchoredPosition = new Vector2(0f, -56f);
+            nameRect.sizeDelta = new Vector2(760f, 28f);
+
+            ConfigureBinding(hudObject, boss, fill, percentage, healthValues);
 
             ScreenBossHealthBar bossHealthBar = GetOrAdd<ScreenBossHealthBar>(hudObject);
             var hudSettings = new SerializedObject(bossHealthBar);
-            hudSettings.FindProperty("boss").objectReferenceValue = boss;
-            hudSettings.FindProperty("fill").objectReferenceValue = fill;
+            hudSettings.FindProperty("barRect").objectReferenceValue = barRect;
             hudSettings.FindProperty("nameLabel").objectReferenceValue = nameLabel;
             hudSettings.FindProperty("displayName").stringValue = "Boss";
             hudSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(bossHealthBar);
         }
 
-        private static Text FindOrCreateText(Transform parent, string name, string value)
+        private static void SetTextRect(RectTransform rect, Vector2 min, Vector2 max)
         {
-            Transform child = parent.Find(name);
-            GameObject target = child != null ? child.gameObject : new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
-            target.transform.SetParent(parent, false);
-            Text text = GetOrAdd<Text>(target);
-            text.text = value;
-            return text;
+            rect.anchorMin = min;
+            rect.anchorMax = max;
+            rect.offsetMin = new Vector2(8f, 0f);
+            rect.offsetMax = new Vector2(-8f, 0f);
+        }
+
+        private static void ConfigureBinding(GameObject target, CombatUnit unit, Image fill,
+            TMP_Text percentage = null, TMP_Text healthValues = null)
+        {
+            var binding = GetOrAdd<HealthBarBinding>(target);
+            var settings = new SerializedObject(binding);
+            settings.FindProperty("unit").objectReferenceValue = unit;
+            settings.FindProperty("fill").objectReferenceValue = fill;
+            settings.FindProperty("percentageLabel").objectReferenceValue = percentage;
+            settings.FindProperty("healthValueLabel").objectReferenceValue = healthValues;
+            settings.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(binding);
         }
 
         private static CombatStatsDefinition GetOrCreateStats(string assetName, int health, int damage,
@@ -189,12 +200,12 @@ namespace RaidCommander.EditorTools
             return stats;
         }
 
-        private static WorldHealthBar ConfigureHealthBar(GameObject unit, Camera camera)
+        private static WorldHealthBar ConfigureHealthBar(GameObject unit, Camera camera, CombatUnit combatUnit)
         {
             Transform existing = unit.transform.Find("World Health Bar");
             GameObject root = existing != null ? existing.gameObject : new GameObject("World Health Bar");
             root.transform.SetParent(unit.transform, false);
-            root.transform.localPosition = new Vector3(0f, unit.name == "Raid Boss" ? 2.35f : 1.8f, 0f);
+            root.transform.localPosition = new Vector3(0f, 1.8f, 0f);
             root.transform.localRotation = Quaternion.identity;
             root.transform.localScale = Vector3.one * 0.01f;
 
@@ -204,20 +215,24 @@ namespace RaidCommander.EditorTools
             canvas.overrideSorting = true;
             canvas.sortingOrder = 5;
             RectTransform canvasRect = root.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(unit.name == "Raid Boss" ? 200f : 140f, 18f);
+            canvasRect.sizeDelta = new Vector2(60f, 14f);
 
             Image background = FindOrCreateImage(root.transform, "Background", new Color(0.08f, 0.08f, 0.08f, 0.9f));
             Stretch(background.rectTransform);
+            var selectable = unit.GetComponent<RaidCommander.Selection.SelectableUnit>();
+            if (selectable != null)
+                HealthBarSceneAssets.ConfigurePartyOutline(background, selectable.Role);
             Image fill = FindOrCreateImage(root.transform, "Health Fill", new Color(0.16f, 0.82f, 0.28f, 1f));
             Stretch(fill.rectTransform);
-            fill.type = Image.Type.Filled;
-            fill.fillMethod = Image.FillMethod.Horizontal;
-            fill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            HealthBarSceneAssets.ConfigureFill(fill);
+            ConfigureBinding(root, combatUnit, fill);
 
             WorldHealthBar bar = GetOrAdd<WorldHealthBar>(root);
             var barSettings = new SerializedObject(bar);
-            barSettings.FindProperty("fill").objectReferenceValue = fill;
-            barSettings.FindProperty("cameraTransform").objectReferenceValue = camera.transform;
+            barSettings.FindProperty("followTarget").objectReferenceValue = unit.transform;
+            barSettings.FindProperty("viewCamera").objectReferenceValue = camera;
+            barSettings.FindProperty("worldOffset").vector3Value = new Vector3(0f, 1.8f, 0f);
+            barSettings.FindProperty("screenHeight").floatValue = 10f;
             barSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(bar);
             return bar;
@@ -230,6 +245,7 @@ namespace RaidCommander.EditorTools
             target.transform.SetParent(parent, false);
             Image image = GetOrAdd<Image>(target);
             image.color = color;
+            image.raycastTarget = false;
             return image;
         }
 
@@ -237,8 +253,8 @@ namespace RaidCommander.EditorTools
         {
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(1f, 1f);
-            rect.offsetMax = new Vector2(-1f, -1f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         private static T GetOrAdd<T>(GameObject target) where T : Component

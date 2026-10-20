@@ -17,11 +17,12 @@ namespace RaidCommander.Combat
         [SerializeField, Min(0)] private int fallbackBasicHealing = 20;
         [SerializeField, Min(0f)] private float fallbackMeleeRange = 2.5f;
         [SerializeField, Min(0f)] private float fallbackRangedRange = 18f;
-        [SerializeField] private WorldHealthBar healthBar;
+        private int maximumHealth;
+        private bool healthInitialized;
 
         public int EncounterId => encounterId;
         public CombatFaction Faction => faction;
-        public int MaximumHealth => stats != null ? stats.MaximumHealth : fallbackMaximumHealth;
+        public int MaximumHealth => healthInitialized ? maximumHealth : ConfiguredMaximumHealth;
         public int CurrentHealth { get; private set; }
         public bool IsAlive => CurrentHealth > 0;
         public int BasicDamage => stats != null ? stats.BasicDamage : fallbackBasicDamage;
@@ -32,11 +33,31 @@ namespace RaidCommander.Combat
         public event Action<CombatUnit> Died;
         public event Action<CombatUnit> HealthChanged;
 
-        private void Awake()
+        private int ConfiguredMaximumHealth => stats != null ? stats.MaximumHealth : fallbackMaximumHealth;
+
+        private void Awake() => InitializeHealth();
+
+        private void InitializeHealth()
         {
-            CurrentHealth = MaximumHealth;
-            if (healthBar != null)
-                healthBar.SetHealth(CurrentHealth, MaximumHealth);
+            if (healthInitialized) return;
+            maximumHealth = Mathf.Max(0, ConfiguredMaximumHealth);
+            healthInitialized = true;
+            CurrentHealth = maximumHealth;
+            NotifyHealthChanged();
+        }
+
+        /// <summary>Changes the runtime cap without healing or reviving the unit.</summary>
+        public void SetMaximumHealth(int value)
+        {
+            InitializeHealth();
+            value = Mathf.Max(0, value);
+            if (maximumHealth == value) return;
+            bool wasAlive = IsAlive;
+            maximumHealth = value;
+            CurrentHealth = Mathf.Min(CurrentHealth, maximumHealth);
+            NotifyHealthChanged();
+            if (wasAlive && !IsAlive)
+                HandleDeath();
         }
 
         public bool SetTarget(CombatUnit target)
@@ -55,19 +76,7 @@ namespace RaidCommander.Combat
             CurrentHealth -= effective;
             NotifyHealthChanged();
             if (CurrentHealth == 0)
-            {
-                CurrentTarget = null;
-                UnitMovement movement = GetComponent<UnitMovement>();
-                if (movement != null)
-                {
-                    movement.Cancel();
-                    movement.enabled = false;
-                }
-                var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-                if (agent != null && agent.isActiveAndEnabled)
-                    agent.isStopped = true;
-                Died?.Invoke(this);
-            }
+                HandleDeath();
             return effective;
         }
 
@@ -88,26 +97,37 @@ namespace RaidCommander.Combat
             CurrentTarget = null;
             UnitMovement movement = GetComponent<UnitMovement>();
             if (movement != null)
-                movement.enabled = true;
+                movement.enabled = IsAlive;
             var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-            if (agent != null && agent.isActiveAndEnabled)
-                agent.isStopped = false;
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+                agent.isStopped = !IsAlive;
             NotifyHealthChanged();
         }
 
         private void NotifyHealthChanged()
         {
-            if (healthBar != null)
-                healthBar.SetHealth(CurrentHealth, MaximumHealth);
             HealthChanged?.Invoke(this);
+        }
+
+        private void HandleDeath()
+        {
+            CurrentTarget = null;
+            UnitMovement movement = GetComponent<UnitMovement>();
+            if (movement != null)
+            {
+                movement.Cancel();
+                movement.enabled = false;
+            }
+            var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+                agent.isStopped = true;
+            Died?.Invoke(this);
         }
 
         private void OnValidate()
         {
             encounterId = Mathf.Max(1, encounterId);
             fallbackMaximumHealth = Mathf.Max(1, fallbackMaximumHealth);
-            if (healthBar == null)
-                healthBar = GetComponentInChildren<WorldHealthBar>(true);
         }
     }
 }
