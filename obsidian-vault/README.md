@@ -12,6 +12,7 @@ This vault holds project context, design notes, architecture planning, and devel
 - [Combat and event logging](systems/combat-and-logging.md) documents melee/ranged damage, the fourth cyan party unit, debug actions, health changes and encounter-scoped combat events.
 - [Reactive health bars](systems/health-bars.md) documents party health displays and the boss HUD.
 - `prompts/tasks/` contains task prompts and implementation planning.
+- [Task implementation workflow](structure/task-workflow.md) defines task identity, revision planning, GitHub issue status, local review, and approval before commit, push, and completion.
 - `AGENTS.md` records practices for maintaining this vault.
 
 Treat the Unity repository as the source of truth for what is implemented. Keep future plans clearly distinguished from completed work.

@@ -1,3 +1,11 @@
+<!-- task-tracking:start -->
+**Task:** T5
+**GitHub issue:** [#6](https://github.com/Regiss1/raid-commander/issues/6)
+**Tracking status:** done (historical completion explicitly confirmed by requester)
+**Implementation commit:** [91e3c9f](https://github.com/Regiss1/raid-commander/commit/91e3c9f0d2b5e3c3667cf1b006b16051e5069e25)
+**Scope revision:** [T5.1](T5.1-reactive-health-bars.md), [#7](https://github.com/Regiss1/raid-commander/issues/7)
+<!-- task-tracking:end -->
+
 ## Objective
 
 Implement the foundational combat systems for our Unity 6, C#, 3D top-down MMO raid simulator, including an event-driven combat logging system inspired by World of Warcraft.

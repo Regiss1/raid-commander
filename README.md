@@ -18,6 +18,12 @@ Networking, progression systems, multiple dungeons, elaborate art, and mod autho
 
 The world is fully 3D. Gameplay movement is on the XZ plane; Y is elevation. Use 3D colliders, physics raycasts, and NavMesh navigation. The camera is an angled, elevated orthographic camera. See [AGENTS.md](AGENTS.md) for project architecture rules.
 
+## Task workflow
+
+Game development tasks use [task files and GitHub Issues](obsidian-vault/structure/task-workflow.md). Implementations remain uncommitted for review; an explicit task-specific approval authorizes commit, push, and issue completion. GitHub Actions validates task filenames and exposes the issue lifecycle once the workflow is published to `main`.
+
+Use the development skill's `revise T5` operation to clarify and record a scope change without implementing it. Scope revisions become separate dotted tasks such as `T5.2`, with their own issue and approval; an unmet original acceptance criterion stays under the existing open task.
+
 ## Unity setup
 
 Open `raid-commander-game/` as the Unity project. It targets Unity `6000.6.6f1`.

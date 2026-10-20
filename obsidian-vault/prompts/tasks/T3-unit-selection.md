@@ -1,3 +1,10 @@
+<!-- task-tracking:start -->
+**Task:** T3
+**GitHub issue:** [#4](https://github.com/Regiss1/raid-commander/issues/4)
+**Tracking status:** done (historical completion explicitly confirmed by requester)
+**Implementation commit:** [5ff2c60](https://github.com/Regiss1/raid-commander/commit/5ff2c60961be96a098d3e304ad6f6b4beea9d2a1)
+<!-- task-tracking:end -->
+
 TASK: Implement Warcraft III-style individual unit selection in our fully 3D, top-down Unity game.
 
 Requirements:

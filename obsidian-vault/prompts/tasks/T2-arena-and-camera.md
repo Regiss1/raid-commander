@@ -1,3 +1,10 @@
+<!-- task-tracking:start -->
+**Task:** T2
+**GitHub issue:** [#3](https://github.com/Regiss1/raid-commander/issues/3)
+**Tracking status:** done (historical completion explicitly confirmed by requester)
+**Implementation commit:** [d20fc1c](https://github.com/Regiss1/raid-commander/commit/d20fc1c54e23a4bb3e950e10f1032880316d67a0)
+<!-- task-tracking:end -->
+
 TASK: Build the first playable 3D test scene.
 
 Requirements:

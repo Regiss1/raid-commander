@@ -1,3 +1,10 @@
+<!-- task-tracking:start -->
+**Task:** T4
+**GitHub issue:** [#5](https://github.com/Regiss1/raid-commander/issues/5)
+**Tracking status:** done (historical completion explicitly confirmed by requester)
+**Implementation commit:** [5a247b6](https://github.com/Regiss1/raid-commander/commit/5a247b6c014bdc8bdba76d2b2452e341f8642414)
+<!-- task-tracking:end -->
+
 TASK: Implement right-click movement for selected units in the 3D top-down arena.
 
 Requirements:

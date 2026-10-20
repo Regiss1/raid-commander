@@ -1,3 +1,10 @@
+<!-- task-tracking:start -->
+**Task:** T1
+**GitHub issue:** [#2](https://github.com/Regiss1/raid-commander/issues/2)
+**Tracking status:** done (historical completion explicitly confirmed by requester)
+**Implementation commit:** [9fd1e72](https://github.com/Regiss1/raid-commander/commit/9fd1e726136b4ae32e0920f11ae00c6772c1c380)
+<!-- task-tracking:end -->
+
 We are building a single-player, 3D, top-down MMO raid simulator in Unity 6 using C#.
 
 Core architecture requirements:
