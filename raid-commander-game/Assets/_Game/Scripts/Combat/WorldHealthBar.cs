@@ -1,32 +1,39 @@
 using UnityEngine;
-using UnityEngine.UI;
+using RaidCommander.UI;
 
 namespace RaidCommander.Combat
 {
-    /// <summary>Small world-space health display; it contains no combat calculations.</summary>
+    /// <summary>Positions a party bar; health updates belong to HealthBarBinding.</summary>
+    [RequireComponent(typeof(HealthBarBinding))]
+    [DefaultExecutionOrder(100)]
     public sealed class WorldHealthBar : MonoBehaviour
     {
-        [SerializeField] private Image fill;
-        [SerializeField] private Transform cameraTransform;
+        [SerializeField] private Transform followTarget;
+        [SerializeField] private Camera viewCamera;
+        [SerializeField] private Vector3 worldOffset = new Vector3(0f, 1.8f, 0f);
+        [SerializeField, Min(1f)] private float screenHeight = 10f;
+        private RectTransform rect;
 
+        private void Awake() => rect = GetComponent<RectTransform>();
+
+        // Only position/orientation/projection are updated per frame. Health is never polled.
         private void LateUpdate()
         {
-            if (cameraTransform == null && Camera.main != null)
-                cameraTransform = Camera.main.transform;
-            if (cameraTransform != null)
-                transform.rotation = cameraTransform.rotation;
-        }
+            if (followTarget != null)
+                transform.position = followTarget.position + worldOffset;
+            if (viewCamera == null) viewCamera = Camera.main;
+            if (viewCamera == null || rect == null || viewCamera.pixelHeight <= 0) return;
 
-        public void SetHealth(int current, int maximum)
-        {
-            if (fill != null)
-                fill.fillAmount = maximum <= 0 ? 0f : Mathf.Clamp01((float)current / maximum);
-        }
-
-        private void OnValidate()
-        {
-            if (fill == null)
-                fill = GetComponentInChildren<Image>(true);
+            transform.rotation = viewCamera.transform.rotation;
+            float viewHeight = viewCamera.orthographic
+                ? 2f * viewCamera.orthographicSize
+                : 2f * Mathf.Abs(Vector3.Dot(transform.position - viewCamera.transform.position,
+                    viewCamera.transform.forward)) * Mathf.Tan(viewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f);
+            float scale = viewHeight / viewCamera.pixelHeight * screenHeight / Mathf.Max(1f, rect.rect.height);
+            Vector3 parentScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
+            transform.localScale = new Vector3(scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.x)),
+                scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.y)),
+                scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.z)));
         }
     }
 }

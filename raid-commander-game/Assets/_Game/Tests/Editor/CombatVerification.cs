@@ -14,6 +14,7 @@ namespace RaidCommander.Verification
         private const string PendingKey = "RaidCommander.CombatVerification.Pending";
         private static IEnumerator checks;
         private static double startedAt;
+        private static bool originalRunInBackground;
 
         static CombatVerification()
         {
@@ -21,6 +22,8 @@ namespace RaidCommander.Verification
             {
                 if (state != PlayModeStateChange.EnteredPlayMode || !SessionState.GetBool(PendingKey, false)) return;
                 SessionState.SetBool(PendingKey, false);
+                originalRunInBackground = Application.runInBackground;
+                Application.runInBackground = true;
                 startedAt = EditorApplication.timeSinceStartup;
                 checks = Verify();
                 EditorApplication.update += Tick;
@@ -42,7 +45,7 @@ namespace RaidCommander.Verification
         {
             try
             {
-                Check(EditorApplication.timeSinceStartup - startedAt < 30, "Verification timed out.");
+                Check(EditorApplication.timeSinceStartup - startedAt < 90, "Verification timed out.");
                 EditorApplication.QueuePlayerLoopUpdate();
                 if (!checks.MoveNext()) Finish(true, "all combat checks passed");
             }
@@ -54,6 +57,7 @@ namespace RaidCommander.Verification
             EditorApplication.update -= Tick;
             (checks as IDisposable)?.Dispose();
             checks = null;
+            Application.runInBackground = originalRunInBackground;
             Debug.Log((passed ? "COMBAT VERIFY PASS: " : "COMBAT VERIFY FAIL: ") + message);
             if (Application.isBatchMode) EditorApplication.Exit(passed ? 0 : 1);
             else EditorApplication.isPlaying = false;
@@ -67,7 +71,7 @@ namespace RaidCommander.Verification
             CombatUnit healer = GameObject.Find("Healer").GetComponent<CombatUnit>();
             CombatUnit dps = GameObject.Find("DPS").GetComponent<CombatUnit>();
             CombatUnit boss = GameObject.Find("Raid Boss").GetComponent<CombatUnit>();
-            CombatSystem combat = UnityEngine.Object.FindFirstObjectByType<CombatSystem>();
+            CombatSystem combat = UnityEngine.Object.FindAnyObjectByType<CombatSystem>();
             CombatLogService log = combat.LogService;
             combat.ResetSession(new[] { tank, healer, dps, boss });
 
@@ -133,6 +137,12 @@ namespace RaidCommander.Verification
             combat.ResetSession(new[] { tank, healer, dps, boss });
             Check(log.History.Count == 0, "Reset did not clear history.");
             boss.transform.position = bossPosition;
+            IEnumerator healthChecks = ReactiveHealthBarVerification.Verify();
+            try
+            {
+                while (healthChecks.MoveNext()) yield return null;
+            }
+            finally { (healthChecks as IDisposable)?.Dispose(); }
         }
 
         private static void Check(bool condition, string message)
