@@ -1,0 +1,29 @@
+name: Validate tasks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Test task tracking
+        run: node --test .github/scripts/task-tracking.test.cjs
+      - name: Validate task names and unique numbers
+        run: |
+          if [ -d obsidian-vault/prompts/tasks ]; then
+            node .github/scripts/task-tracking.cjs validate
+          else
+            echo "No task directory on this branch yet; nothing to validate."
+          fi
