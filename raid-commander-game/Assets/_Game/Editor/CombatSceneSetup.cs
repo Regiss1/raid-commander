@@ -46,6 +46,7 @@ namespace RaidCommander.EditorTools
             var combat = GetOrAdd<CombatSystem>(serviceObject);
             var combatSettings = new SerializedObject(combat);
             combatSettings.FindProperty("logService").objectReferenceValue = log;
+            combatSettings.FindProperty("obstacleRoot").objectReferenceValue = Require(scene, "Obstacles").transform;
             combatSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(combat);
             RangedDpsSceneSetup.ConfigureTracer(rangedDps, combat);

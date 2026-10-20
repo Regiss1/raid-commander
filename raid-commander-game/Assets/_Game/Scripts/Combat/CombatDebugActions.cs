@@ -24,9 +24,11 @@ namespace RaidCommander.Combat
             }
 
             int healthBefore = tank.CurrentHealth;
-            if (!combat.TryHeal(healer, tank))
+            if (!combat.TryHeal(healer, tank, out CombatActionFailure failure))
             {
-                LastStatus = DescribeRejectedAction(healer, tank, healer.RangedRange, "heal");
+                LastStatus = failure == CombatActionFailure.LineOfSight
+                    ? "Healer failed because of line of sight"
+                    : DescribeRejectedAction(healer, tank, healer.RangedRange, "heal");
                 return;
             }
 
@@ -47,9 +49,11 @@ namespace RaidCommander.Combat
             }
 
             int healthBefore = boss.CurrentHealth;
-            if (!combat.TryRangedAttack(rangedDps, boss))
+            if (!combat.TryRangedAttack(rangedDps, boss, out CombatActionFailure failure))
             {
-                LastStatus = DescribeRejectedAction(rangedDps, boss, rangedDps.RangedRange, "ranged attack");
+                LastStatus = failure == CombatActionFailure.LineOfSight
+                    ? "Ranged DPS failed because of line of sight"
+                    : DescribeRejectedAction(rangedDps, boss, rangedDps.RangedRange, "ranged attack");
                 return;
             }
 

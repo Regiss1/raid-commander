@@ -43,4 +43,6 @@ For the command API, completion states, and current limits, see [team member mov
 
 Use **Ranged: Ranged DPS to Boss** in the combat debug panel for an immediate ranged attack and brief cyan tracer. The boss is the debug attack target; party selection does not change it. Ranged DPS starts with 100 health, 20 damage and an 18-unit attack range. Existing melee, healing, damage and reset buttons remain available; **F8** hides/shows the panel. Combat is still triggered through debug buttons; autonomous attacks and right-click attacks are future work.
 
+Ranged attacks and targeted heals fail when a solid collider under **Obstacles** crosses their XZ path; low and high cover block equally. The debug panel explains the line-of-sight failure without changing health or adding a combat-log entry. Unit bodies and ground do not block these actions. Use **Raid Commander > Verify Combat Line of Sight in Play Mode** to repeat the integrated checks.
+
 **Raid Commander > Configure Ranged DPS** updates the open arena with all four party units and their selection, movement, combat and health wiring while preserving its geometry. The saved scene is already configured. **Verify Ranged DPS in Play Mode** runs the combined combat, reactive health and ranged checks. See [combat and event logging](obsidian-vault/systems/combat-and-logging.md).
