@@ -121,6 +121,18 @@ async function createTaskIssue(client, tasks, requestedId) {
   return issue;
 }
 
+function validateCommitSubject(message, branch, taskId, issueNumber) {
+  const subject = message.split(/\r?\n/, 1)[0];
+  const branchSuffix = branch.split('/').at(-1);
+  const type = ['feat', 'refact', 'fix'].find(value => subject.startsWith(`${value}(${branchSuffix}) => `));
+  const prefix = type ? `${type}(${branchSuffix}) => ` : '';
+  const ending = ` ${taskId}  #${issueNumber}`;
+  const description = subject.slice(prefix.length, -ending.length);
+  if (!type || !subject.endsWith(ending) || !description || description.trim() !== description) {
+    throw new Error(`The commit subject must use feat, refact, or fix with this format: type(${branchSuffix}) => Brief description ${taskId}  #${issueNumber}`);
+  }
+}
+
 async function transition(client, options) {
   const id = normalizeId(options.task);
   if (!STATUSES.includes(options.status)) throw new Error('Unknown task status.');
@@ -145,10 +157,7 @@ async function transition(client, options) {
     if (!options.branch) throw new Error('Completion requires the pushed branch name.');
     const branch = await client.request('GET', `/branches/${encodeURIComponent(options.branch)}`);
     const commit = await client.request('GET', `/commits/${options.commit}`);
-    const lines = commit.commit.message.split(/\r?\n/).map(line => line.trim());
-    if (!lines.includes(`Task: ${id}`) || !lines.includes(`Refs #${issue.number}`)) {
-      throw new Error(`The pushed commit must include Task: ${id} and Refs #${issue.number} on separate lines.`);
-    }
+    validateCommitSubject(commit.commit.message, options.branch, id, issue.number);
     const comparison = await client.request('GET', `/compare/${options.commit}...${branch.commit.sha}`);
     if (!['ahead', 'identical'].includes(comparison.status)) throw new Error('Approved commit is not on the pushed branch.');
     const folder = await client.request('GET', `/contents/${TASK_FOLDER}?ref=${options.commit}`);
@@ -194,5 +203,5 @@ async function main(argv) {
   } else throw new Error('Use validate, create, inspect, or transition.');
 }
 
-module.exports = { normalizeId, validateNames, localTasks, findIssue, issueStatus, createTaskIssue, transition };
+module.exports = { normalizeId, validateNames, localTasks, findIssue, issueStatus, createTaskIssue, validateCommitSubject, transition };
 if (require.main === module) main(process.argv.slice(2)).catch(error => { console.error(error.message); process.exitCode = 1; });
