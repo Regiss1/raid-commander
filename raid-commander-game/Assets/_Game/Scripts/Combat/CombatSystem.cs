@@ -10,10 +10,15 @@ namespace RaidCommander.Combat
     {
         [SerializeField] private CombatLogService logService;
         [SerializeField] private Transform obstacleRoot;
+        [SerializeField] private CombatUnit debugBoss;
         private readonly CombatLineOfSight lineOfSight = new CombatLineOfSight();
         public event Action<ResolvedCombatEvent> EventResolved;
+        public event Action SessionReset;
 
         public CombatLogService LogService => logService;
+        public bool KeepBossAlive { get; set; }
+
+        public bool HasLineOfSight(Vector3 source, Vector3 target) => lineOfSight.IsClear(obstacleRoot, source, target);
 
         public bool TryMeleeAttack(CombatUnit source, CombatUnit target)
         {
@@ -54,7 +59,7 @@ namespace RaidCommander.Combat
         public bool TryHeal(CombatUnit source, CombatUnit target, out CombatActionFailure failure)
         {
             failure = CombatActionFailure.InvalidRequest;
-            if (!CanActOn(source, target) || source.Faction != target.Faction
+            if (source == null || target == null || !source.IsAlive || !target.IsAlive || source.Faction != target.Faction
                 || PlanarDistance(source.transform.position, target.transform.position) > source.RangedRange)
                 return false;
 
@@ -65,7 +70,7 @@ namespace RaidCommander.Combat
             }
 
             failure = CombatActionFailure.None;
-            source.SetTarget(target);
+            source.SetTarget(source == target ? null : target);
             FaceTarget(source, target);
             int effective = target.ApplyHealing(source.BasicHealing);
             if (effective > 0)
@@ -78,6 +83,9 @@ namespace RaidCommander.Combat
         {
             if (target == null || !target.IsAlive || amount <= 0 || (source != null && !source.IsAlive))
                 return 0;
+            // Development damage floor belongs in resolution so every damage producer agrees.
+            if (KeepBossAlive && target == debugBoss)
+                amount = Mathf.Min(amount, Mathf.Max(0, target.CurrentHealth - 1));
             int effective = target.ApplyDamage(amount);
             if (effective <= 0)
                 return 0;
@@ -104,6 +112,7 @@ namespace RaidCommander.Combat
                 foreach (CombatUnit unit in units)
                     if (unit != null) unit.ResetHealth();
             logService?.ResetSession();
+            SessionReset?.Invoke();
         }
 
         private bool CanActOn(CombatUnit source, CombatUnit target) =>

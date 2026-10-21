@@ -13,6 +13,11 @@ namespace RaidCommander.Combat
         [SerializeField] private CombatUnit boss;
 
         public string LastStatus { get; private set; } = "Choose a combat action.";
+        public bool KeepBossAlive
+        {
+            get => combat != null && combat.KeepBossAlive;
+            set { if (combat != null) combat.KeepBossAlive = value; }
+        }
 
         public void TankMelee() => TryMelee(tank, "Tank");
         public void HealerHeal()

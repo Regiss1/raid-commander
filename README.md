@@ -45,9 +45,13 @@ After editing arena geometry, use **Raid Commander > Configure Movement and Bake
 
 Party members and the boss can pass through each other and share destinations. Movement clicks pass through their bodies to the ground; solid arena obstacles still block paths.
 
-For the command API, completion states, and current limits, see [team member movement v1.2](obsidian-vault/systems/team-member-movement.md). Run **Raid Commander > Verify Movement in Play Mode** from Edit mode to repeat the four-unit movement checks; the verification exits Play mode when finished.
+For the command API, completion states, and current limits, see [team member movement v1.3](obsidian-vault/systems/team-member-movement.md). Run **Raid Commander > Verify Movement in Play Mode** from Edit mode to repeat the four-unit movement checks; the verification exits Play mode when finished.
 
-Use **Ranged: Ranged DPS to Boss** in the combat debug panel for an immediate ranged attack and brief cyan tracer. The boss is the debug attack target; party selection does not change it. Ranged DPS starts with 100 health, 20 damage and an 18-unit attack range. Existing melee, healing, damage and reset buttons remain available; **F8** hides/shows the panel. Combat is still triggered through debug buttons; autonomous attacks and right-click attacks are future work.
+All four party members now act automatically: Tank and Melee DPS approach and attack, Ranged DPS maintains attack spacing, and Healer prioritizes the injured Tank before other injured allies, including self. The stationary boss periodically melees the Tank. Units move around obstacles for clear sight. Manual movement overrides positioning while valid attacks/heals continue; autonomous positioning resumes afterward. Boss death leaves party AI idle. See [autonomous party AI](obsidian-vault/systems/autonomous-party-ai.md).
+
+The combat debug panel shows every unit's AI state and target. **Keep Boss Alive (minimum 1 HP)** prevents lethal boss damage until toggled off. Existing attack, heal, damage, kill and health/log reset buttons remain available; **F8** hides/shows the panel. **Ranged: Ranged DPS to Boss** still produces an immediate attack and brief cyan tracer. Ranged DPS starts with 100 health, 20 damage and an 18-unit range. Right-click attacks remain future work.
+
+Use **Raid Commander > Configure Autonomous Party AI** to update AI wiring in the open arena without regenerating geometry or rebaking navigation. The saved scene is configured. **Verify Party AI in Play Mode** exercises an unattended encounter, role priorities, obstacle routing, manual combat/resume, boss timing, death/reset and the debug damage floor. The existing movement and combat suites suspend AI only for their temporary regression fixtures.
 
 Ranged attacks and targeted heals fail when a solid collider under **Obstacles** crosses their XZ path; low and high cover block equally. The debug panel explains the line-of-sight failure without changing health or adding a combat-log entry. Unit bodies and ground do not block these actions. Use **Raid Commander > Verify Combat Line of Sight in Play Mode** to repeat the integrated checks.
 

@@ -19,7 +19,7 @@
 - [x] Generate the 3D arena, party placeholders, boss, lighting, and obstacles in Unity.
 - [x] Implement individual friendly-unit selection with 3D raycasts, role hotkeys, clear-on-empty, and an XZ selection ring.
 - [x] Implement direct movement orders using 3D raycasts and NavMesh, with temporary markers and explicit command completion.
-- [ ] Implement autonomous role behavior with explicit player movement overrides.
+- [x] Implement four autonomous roles, Tank-first healing/self-healing, obstacle sight recovery and stationary boss attacks; verify manual overrides with continuing combat/resume, independent units and an unattended boss kill (T7; requester approved).
 - [x] Configure the arena with basic health, melee attacks, healing, and combat event logging.
 - [x] Run combat verification in Play mode.
 - [x] Add reactive party and boss health bars, outlined boss health values, and verify notifications and responsive layouts.

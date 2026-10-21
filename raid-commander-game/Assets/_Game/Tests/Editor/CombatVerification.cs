@@ -22,6 +22,7 @@ namespace RaidCommander.Verification
             {
                 if (state != PlayModeStateChange.EnteredPlayMode || !SessionState.GetBool(PendingKey, false)) return;
                 SessionState.SetBool(PendingKey, false);
+                PartyAiVerification.SuspendAutonomy();
                 originalRunInBackground = Application.runInBackground;
                 Application.runInBackground = true;
                 startedAt = EditorApplication.timeSinceStartup;
@@ -65,6 +66,7 @@ namespace RaidCommander.Verification
 
         private static IEnumerator Verify()
         {
+            PartyAiVerification.SuspendAutonomy();
             yield return null;
             yield return null;
             CombatUnit tank = GameObject.Find("Tank").GetComponent<CombatUnit>();

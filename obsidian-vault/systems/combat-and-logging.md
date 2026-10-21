@@ -1,4 +1,4 @@
-# Combat and event logging v1.5
+# Combat and event logging v1.6
 
 **Status:** implemented
 
@@ -20,6 +20,9 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - The screen-space debug panel shows recent events and action feedback, and can be hidden with F8. Its buttons are also available while the panel is visible.
 
 ## Implementation
+
+- T7's [autonomous party AI](autonomous-party-ai.md) produces periodic melee/ranged/healing requests, including Tank-first healing and stationary boss attacks. `HasLineOfSight` exposes the existing sight helper to these producers. `TryHeal` now permits self-healing while attack source/target restrictions remain unchanged. `SessionReset` notifies brains after health/log reset.
+- The debug panel shows each unit's AI state/target. **Keep Boss Alive (minimum 1 HP)** defaults off. `ApplyDamage` applies the configured debug-boss target's one-health floor before effective damage and event publication, including debug kill. Protected hits cannot publish a death event. The runtime toggle persists across health/log reset, does not revive a dead boss, and resets when Play mode ends.
 
 - `CombatUnit` stores faction, encounter ID, runtime health, target, and basic values. Stats supply initial maximum health; `SetMaximumHealth` preserves current health, clamps it to the cap and publishes `HealthChanged`. The component has no UI references. `CombatSceneSetup` creates and assigns per-unit `CombatStatsDefinition` ScriptableObject assets.
 - `CombatSystem` validates faction, range, and alive state, applies effective health changes, then notifies C# event subscribers and its optional log service. Logging is optional and has no gameplay callbacks.
@@ -61,7 +64,7 @@ Reactive presentation, boss numerical values and outlined text are documented in
 
 ## Current scope
 
-Basic resolved melee/ranged damage, targeted healing, obstacle-footprint sight checks, health capping, death, target/faction checks, planar range, facing, health presentation, and in-memory event logging are implemented. There is no autonomous combat behavior, attack interval, right-click attack, physics projectile, height-aware/partial cover, automatic boss attack, armor, critical calculation, shields, periodic effects, casting, AoE, encounter result flow, or persistence. Use **Raid Commander > Configure Combat and Logging** to reapply combat setup, and **Verify Combat Line of Sight in Play Mode** (or the existing combat/ranged verification menus) to run the combined combat, reactive health, ranged and sight suite. Debug buttons remain the combat entry point; press F8 to hide/show the panel.
+Basic resolved melee/ranged damage, targeted/self healing, obstacle-footprint sight checks, health capping, death, target/faction checks, planar range, facing, health presentation, and in-memory event logging are implemented. T7's independent role/boss producers add autonomous combat and action intervals; see the dedicated AI note. There is no right-click attack, physics projectile, height-aware/partial cover, armor, critical calculation, shields, periodic effects, casting, AoE, encounter result flow, or persistence. Use **Raid Commander > Configure Combat and Logging** for full combat setup, **Configure Autonomous Party AI** for AI-only wiring, and **Verify Combat Line of Sight in Play Mode** for the combined combat, reactive health, ranged and sight suite. Press F8 to hide/show the panel.
 
 T6.1 runtime checks passed on 2026-10-20 for blocked and clear ranged attacks/heals, low/high/elevated obstacles, nested hierarchy filtering, disabled/inactive/trigger colliders, unrelated Default-layer geometry, segment endpoints, rotated collider footprints, initial overlaps and the existing arena column. Rejection preserves health/bar fill, events and log history; clear paths retain normal effective outcomes and tracer feedback. Melee and trusted direct damage/healing/kill/reset checks passed. The existing combat, reactive-health and T6 ranged checks also passed. The requester approved both T6 and T6.1 on 2026-10-20; separate task commits and GitHub issue accounting retain their review boundaries.
 
@@ -75,6 +78,7 @@ Unity Pipeline `0.8.0-exp.1` supports this workflow from Codex CLI. In a restric
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.6 | 2026-10-20 | Integrated autonomous role/boss producers, normal self-healing, shared sight access and reset notifications; added effective boss damage-floor resolution and per-unit state debugging. |
 | v1.5 | 2026-10-20 | Added shared height-independent obstacle sight checks for ranged attacks and targeted healing, with debug-only rejection reasons; verified collider filtering, clear recovery and combat regressions. |
 | v1.4 | 2026-10-20 | Added the fourth cyan party unit, reusable immediate ranged damage, boss-targeted debug action, resolved ranged events and independent tracer; passed runtime integration and regression checks. |
 | v1.3 | 2026-10-20 | Removed UI ownership from combat units, added explicit maximum-health notifications and verified shared reactive health bars alongside existing combat behavior. |

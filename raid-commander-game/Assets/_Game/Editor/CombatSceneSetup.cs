@@ -47,6 +47,7 @@ namespace RaidCommander.EditorTools
             var combatSettings = new SerializedObject(combat);
             combatSettings.FindProperty("logService").objectReferenceValue = log;
             combatSettings.FindProperty("obstacleRoot").objectReferenceValue = Require(scene, "Obstacles").transform;
+            combatSettings.FindProperty("debugBoss").objectReferenceValue = boss;
             combatSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(combat);
             RangedDpsSceneSetup.ConfigureTracer(rangedDps, combat);
@@ -74,6 +75,7 @@ namespace RaidCommander.EditorTools
             panelSettings.FindProperty("boss").objectReferenceValue = boss;
             panelSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(panel);
+            PartyAiSceneSetup.Apply(scene, combat, tank, healer, dps, rangedDps, boss);
         }
 
         private static CombatUnit ConfigureUnit(GameObject target, int id, CombatFaction faction, Camera camera,

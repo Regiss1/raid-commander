@@ -32,6 +32,7 @@ namespace RaidCommander.Verification
                 if (state != PlayModeStateChange.EnteredPlayMode || !SessionState.GetBool(PendingKey, false))
                     return;
                 SessionState.SetBool(PendingKey, false);
+                PartyAiVerification.SuspendAutonomy();
                 startedAt = EditorApplication.timeSinceStartup;
                 checks = Verify();
                 EditorApplication.update += Tick;
@@ -85,6 +86,7 @@ namespace RaidCommander.Verification
 
         private static IEnumerator Verify()
         {
+            PartyAiVerification.SuspendAutonomy();
             inputSettings = InputSystem.settings;
             originalBackground = inputSettings.backgroundBehavior;
             originalEditorInput = inputSettings.editorInputBehaviorInPlayMode;
@@ -118,6 +120,7 @@ namespace RaidCommander.Verification
 
             // Exercise the actual Input System right-button binding, not just the executor API.
             Mouse mouse = InputSystem.AddDevice<Mouse>();
+            int inputCommandBefore = tank.CommandId;
             try
             {
                 Vector2 screen = camera.WorldToScreenPoint(target);
@@ -125,7 +128,7 @@ namespace RaidCommander.Verification
                 Debug.Log($"INPUT CHECK: screen={screen}, viewport={camera.pixelRect}, hit={probe.collider?.name}, point={probe.point}, frame={Time.frameCount}");
                 InputSystem.QueueStateEvent(mouse, new MouseState { position = screen }.WithButton(MouseButton.Right));
                 double inputDeadline = EditorApplication.timeSinceStartup + 3;
-                while (tank.CommandId == 0)
+                while (tank.CommandId == inputCommandBefore)
                 {
                     Check(EditorApplication.timeSinceStartup < inputDeadline,
                         $"Right-click Input Action did not issue movement. frame={Time.frameCount}, mouse={Mouse.current?.position.ReadValue()}, button={mouse.rightButton.isPressed}, selected={selection.SelectedUnit?.name}");

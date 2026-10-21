@@ -42,6 +42,8 @@ The `Scripts` folders are organized by feature. Keep components small and compos
 
 `Combat/` contains health/state, melee and immediate ranged resolution, combat events/logging, debug command production and the independent ranged tracer. `Data/BaseGame/Units/` holds stats for four party roles and the boss. Arena setup lives in `_Game/Editor/`; `RangedDpsSceneSetup` adds the fourth unit through the existing selection, movement and combat owners without regenerating arena geometry. Integration runners live in `_Game/Tests/Editor/`.
 
+`Units/` contains `PartyRoleBrain`, `BossBasicAttack` and the bounded `CombatPositionSearch` helper. They own decisions independently of movement execution and combat resolution. `PartyAiSceneSetup` wires the existing arena without rebuilding geometry; full combat setup also calls this wiring. `PartyAiVerification` exercises unattended encounters and manual overrides in real Play mode. See [autonomous party AI](../systems/autonomous-party-ai.md).
+
 ## World conventions
 
 - This is a fully 3D Unity project. XZ is the horizontal gameplay plane; Y is elevation.

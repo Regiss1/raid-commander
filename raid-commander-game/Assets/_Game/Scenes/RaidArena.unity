@@ -648,6 +648,7 @@ GameObject:
   - component: {fileID: 338086624}
   - component: {fileID: 338086623}
   - component: {fileID: 338086625}
+  - component: {fileID: 338086626}
   m_Layer: 9
   m_Name: Tank
   m_TagString: Untagged
@@ -820,6 +821,32 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
+--- !u!114 &338086626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338086617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8994d5d5033cfa42b792c0ba8ca8b1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.PartyRoleBrain
+  role: 0
+  combat: {fileID: 1443734131}
+  boss: {fileID: 419772314}
+  tank: {fileID: 338086625}
+  party:
+  - {fileID: 338086625}
+  - {fileID: 615512142}
+  - {fileID: 1568423918}
+  - {fileID: 1035513437}
+  decisionInterval: 0.2
+  actionInterval: 1.5
+  positionSearchInterval: 0.8
+  preferredDistance: 0
+  safeBossDistance: 6
 --- !u!1 &381147676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1036,6 +1063,7 @@ GameObject:
   - component: {fileID: 419772312}
   - component: {fileID: 419772311}
   - component: {fileID: 419772314}
+  - component: {fileID: 419772315}
   m_Layer: 10
   m_Name: Raid Boss
   m_TagString: Untagged
@@ -1158,6 +1186,21 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 3.5
   fallbackRangedRange: 4
+--- !u!114 &419772315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419772309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9829ac00213b51d43abbbe04377c6b75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.BossBasicAttack
+  combat: {fileID: 1443734131}
+  tank: {fileID: 338086625}
+  attackInterval: 2
 --- !u!1 &434457840
 GameObject:
   m_ObjectHideFlags: 0
@@ -1644,6 +1687,7 @@ GameObject:
   - component: {fileID: 615512141}
   - component: {fileID: 615512140}
   - component: {fileID: 615512142}
+  - component: {fileID: 615512143}
   m_Layer: 9
   m_Name: Healer
   m_TagString: Untagged
@@ -1816,6 +1860,32 @@ MonoBehaviour:
   fallbackBasicHealing: 25
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 18
+--- !u!114 &615512143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615512134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8994d5d5033cfa42b792c0ba8ca8b1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.PartyRoleBrain
+  role: 3
+  combat: {fileID: 1443734131}
+  boss: {fileID: 419772314}
+  tank: {fileID: 338086625}
+  party:
+  - {fileID: 338086625}
+  - {fileID: 615512142}
+  - {fileID: 1568423918}
+  - {fileID: 1035513437}
+  decisionInterval: 0.2
+  actionInterval: 1.5
+  positionSearchInterval: 0.8
+  preferredDistance: 12
+  safeBossDistance: 6
 --- !u!1 &616637961
 GameObject:
   m_ObjectHideFlags: 0
@@ -2781,6 +2851,7 @@ GameObject:
   - component: {fileID: 1035513437}
   - component: {fileID: 1035513439}
   - component: {fileID: 1035513438}
+  - component: {fileID: 1035513447}
   m_Layer: 9
   m_Name: Ranged DPS
   m_TagString: Untagged
@@ -3086,6 +3157,32 @@ Transform:
   - {fileID: 80400391}
   m_Father: {fileID: 742693959}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1035513447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1035513436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8994d5d5033cfa42b792c0ba8ca8b1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.PartyRoleBrain
+  role: 2
+  combat: {fileID: 1443734131}
+  boss: {fileID: 419772314}
+  tank: {fileID: 338086625}
+  party:
+  - {fileID: 338086625}
+  - {fileID: 615512142}
+  - {fileID: 1568423918}
+  - {fileID: 1035513437}
+  decisionInterval: 0.2
+  actionInterval: 1.5
+  positionSearchInterval: 0.8
+  preferredDistance: 12
+  safeBossDistance: 6
 --- !u!1 &1079762253
 GameObject:
   m_ObjectHideFlags: 0
@@ -3975,6 +4072,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Combat.CombatSystem
   logService: {fileID: 1443734132}
   obstacleRoot: {fileID: 666808806}
+  debugBoss: {fileID: 419772314}
 --- !u!114 &1443734132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4133,6 +4231,7 @@ GameObject:
   - component: {fileID: 1568423917}
   - component: {fileID: 1568423916}
   - component: {fileID: 1568423918}
+  - component: {fileID: 1568423919}
   m_Layer: 9
   m_Name: DPS
   m_TagString: Untagged
@@ -4305,6 +4404,32 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
+--- !u!114 &1568423919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568423910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8994d5d5033cfa42b792c0ba8ca8b1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.PartyRoleBrain
+  role: 1
+  combat: {fileID: 1443734131}
+  boss: {fileID: 419772314}
+  tank: {fileID: 338086625}
+  party:
+  - {fileID: 338086625}
+  - {fileID: 615512142}
+  - {fileID: 1568423918}
+  - {fileID: 1035513437}
+  decisionInterval: 0.2
+  actionInterval: 1.5
+  positionSearchInterval: 0.8
+  preferredDistance: 0
+  safeBossDistance: 6
 --- !u!1 &1786974364
 GameObject:
   m_ObjectHideFlags: 0

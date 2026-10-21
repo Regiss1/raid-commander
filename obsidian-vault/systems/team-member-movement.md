@@ -1,4 +1,4 @@
-# Team member movement v1.2
+# Team member movement v1.3
 
 **Status:** implemented
 
@@ -46,7 +46,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 
 ## Current scope
 
-V1.2 supports four party members with individual orders, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. The Autonomous source is an integration API; role decision logic is future work. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
+V1.3 supports four party members with individual orders, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. T7's [autonomous party AI](autonomous-party-ai.md) now uses the existing Autonomous source; movement execution retains its API and terminal states. Brains yield positioning during manual ownership, permit valid combat while moving, and evaluate fresh destinations after release. Selection remains independent. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
 
 Navigation preserves elevation, but the current arena is flat. Multilevel targeting, slope presentation, and more complex terrain still need dedicated level validation. A shared marker shows only the most recent player request; it is feedback rather than a persistent marker for every moving unit.
 
@@ -64,6 +64,7 @@ Verified v1.1 on 2026-10-18 in Unity 6000.6.6f1: the automated Play-mode checks 
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.3 | 2026-10-20 | Integrated independent role positioning through the existing Autonomous source; verified combat during manual movement, selection independence, ownership release and autonomous resume in T7's Play-mode suite. |
 | v1.2 | 2026-10-20 | Extended setup and regression checks to four party members; verified Ranged DPS movement and preserved customized arena geometry. |
 | v1.1 | 2026-10-18 | Made party members and boss mutually passable; removed unit separation, unit collisions, boss bake obstruction, and unit blocking of movement targeting. Added crossing and shared-destination checks. |
 | v1 | 2026-10-18 | Added baked 3D navigation, individual right-click orders, destination feedback, unreachable-target rejection, and movement ownership with explicit command outcomes. |

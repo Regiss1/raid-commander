@@ -1,5 +1,6 @@
 using System.Text;
 using RaidCommander.Combat;
+using RaidCommander.Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,8 +21,17 @@ namespace RaidCommander.UI
         private InputAction toggleAction;
         private Vector2 scroll;
         private readonly StringBuilder builder = new StringBuilder(1600);
+        private PartyRoleBrain[] brains;
+        private BossBasicAttack bossAttack;
 
-        private void Awake() => toggleAction = new InputAction("Toggle Combat Debug", InputActionType.Button, "<Keyboard>/f8");
+        private void Awake()
+        {
+            toggleAction = new InputAction("Toggle Combat Debug", InputActionType.Button, "<Keyboard>/f8");
+            CombatUnit[] party = { tank, healer, dps, rangedDps };
+            brains = new PartyRoleBrain[party.Length];
+            for (int i = 0; i < party.Length; i++) brains[i] = party[i] != null ? party[i].GetComponent<PartyRoleBrain>() : null;
+            bossAttack = boss != null ? boss.GetComponent<BossBasicAttack>() : null;
+        }
         private void OnEnable() => toggleAction?.Enable();
         private void OnDisable() => toggleAction?.Disable();
         private void OnDestroy() => toggleAction?.Dispose();
@@ -42,6 +52,15 @@ namespace RaidCommander.UI
 
             GUILayout.BeginArea(new Rect(12, 12, 370, Screen.height - 24), GUI.skin.box);
             GUILayout.Label("Combat Debug  (F8 hides panel)");
+            scroll = GUILayout.BeginScrollView(scroll);
+            if (actions != null)
+                actions.KeepBossAlive = GUILayout.Toggle(actions.KeepBossAlive, "Keep Boss Alive (minimum 1 HP)");
+            if (brains != null)
+                foreach (PartyRoleBrain brain in brains)
+                    if (brain != null) GUILayout.Label(brain.name + ": " + brain.State
+                        + (brain.Target != null ? " -> " + brain.Target.name : ""));
+            if (bossAttack != null) GUILayout.Label("Boss: " + bossAttack.State);
+            GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Melee: Tank to Boss")) actions?.TankMelee();
             if (GUILayout.Button("Heal: Healer to Tank")) actions?.HealerHeal();
@@ -57,7 +76,6 @@ namespace RaidCommander.UI
             if (actions != null)
                 GUILayout.Label(actions.LastStatus, GUI.skin.box);
             GUILayout.Space(5);
-            scroll = GUILayout.BeginScrollView(scroll);
             if (log != null)
             {
                 int start = Mathf.Max(0, log.History.Count - visibleEntries);
