@@ -249,7 +249,7 @@ MonoBehaviour:
   followTarget: {fileID: 1035513446}
   viewCamera: {fileID: 540495315}
   worldOffset: {x: 0, y: 1.8, z: 0}
-  screenHeight: 10
+  screenHeight: 5
 --- !u!114 &80400393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1258,7 +1258,7 @@ MonoBehaviour:
   followTarget: {fileID: 338086618}
   viewCamera: {fileID: 540495315}
   worldOffset: {x: 0, y: 1.8, z: 0}
-  screenHeight: 10
+  screenHeight: 5
 --- !u!223 &434457843
 Canvas:
   m_ObjectHideFlags: 0
@@ -2056,7 +2056,7 @@ MonoBehaviour:
   followTarget: {fileID: 1568423911}
   viewCamera: {fileID: 540495315}
   worldOffset: {x: 0, y: 1.8, z: 0}
-  screenHeight: 10
+  screenHeight: 5
 --- !u!223 &628942957
 Canvas:
   m_ObjectHideFlags: 0
@@ -4892,7 +4892,7 @@ MonoBehaviour:
   followTarget: {fileID: 615512135}
   viewCamera: {fileID: 540495315}
   worldOffset: {x: 0, y: 1.8, z: 0}
-  screenHeight: 10
+  screenHeight: 5
 --- !u!223 &2123996530
 Canvas:
   m_ObjectHideFlags: 0

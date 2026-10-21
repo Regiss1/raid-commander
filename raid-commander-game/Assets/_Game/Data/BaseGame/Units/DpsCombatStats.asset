@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DpsCombatStats
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Combat.CombatStatsDefinition
   maximumHealth: 100
-  basicDamage: 20
+  basicDamage: 40
   basicHealing: 20
   meleeRange: 2.5
   rangedRange: 4
-  attackSpeed: 1
+  attackSpeed: 0.5

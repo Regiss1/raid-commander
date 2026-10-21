@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f133a6977184019827b10037d6ad639, type: 3}
   m_Name: BossCombatStats
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Combat.CombatStatsDefinition
-  maximumHealth: 500
-  basicDamage: 30
+  maximumHealth: 5000
+  basicDamage: 45
   basicHealing: 0
   meleeRange: 3.5
   rangedRange: 4
+  attackSpeed: 1

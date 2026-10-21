@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f133a6977184019827b10037d6ad639, type: 3}
   m_Name: TankCombatStats
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Combat.CombatStatsDefinition
-  maximumHealth: 120
+  maximumHealth: 200
   basicDamage: 18
   basicHealing: 20
-  meleeRange: 2.5
-  rangedRange: 4
-  attackSpeed: 1
+  meleeRange: 2
+  rangedRange: 60
+  attackSpeed: 0.2
