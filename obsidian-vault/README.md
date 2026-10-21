@@ -9,7 +9,8 @@ This vault holds project context, design notes, architecture planning, and devel
 - `checklists/development.checklist.md` tracks foundation and MVP progress.
 - `systems/` contains dedicated notes describing implemented game systems and their current versions.
 - [Team member movement](systems/team-member-movement.md) documents right-click orders, navigation, and command completion.
-- [Autonomous party AI](systems/autonomous-party-ai.md) documents four roles, stationary boss attacks, manual positioning priority, sight recovery and state/floor debugging.
+- [Autonomous party AI](systems/autonomous-party-ai.md) documents four roles, manual positioning priority, hazard/chase reactions, sight recovery and state/floor debugging.
+- [Boss abilities and hazards](systems/boss-abilities-and-hazards.md) documents mobile boss targeting, Wall of Flames, clipped telegraphs, per-instance loadouts and the separate boss navigation bake.
 - [Combat and event logging](systems/combat-and-logging.md) documents melee/ranged damage, the fourth cyan party unit, debug actions, health changes and encounter-scoped combat events.
 - [Reactive health bars](systems/health-bars.md) documents party health displays and the boss HUD.
 - `prompts/tasks/` contains task prompts and implementation planning.

@@ -1,4 +1,4 @@
-# Team member movement v1.3
+# Team member movement v1.4
 
 **Status:** implemented
 
@@ -17,6 +17,9 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - Invalid, disconnected, and partial-path destinations are rejected before changing the active order. Walls and other solid arena obstacles still block ground targeting.
 
 ## Implementation
+
+- T8 reuses `UnitMovement` for the mobile boss and party escape/retreat requests. Brains retain manual priority and track their own reaction command IDs, preventing reaction cleanup from cancelling a newer player order. Candidate paths are checked against pending hazard geometry by the reaction producer. The executor's feet calculation now converts the agent's scaled base offset to world distance, supporting the boss placeholder's 1.5 Y scale without changing party behavior.
+- A separate boss NavMesh profile and saved mesh supply clearance for its larger body while preserving the party mesh. Both remain static, passable between units and blocked by solid arena geometry. **Configure Movement and Bake Navigation** rebakes both current surfaces; see [boss abilities and hazards](boss-abilities-and-hazards.md).
 
 - `PlayerMovementInput` uses the Input System right-button action and the central selection controller. Its raycast excludes FriendlyUnit and HostileUnit, checks the first remaining collider against the Ground mask, submits a manual command, and updates `DestinationMarker`.
 - `UnitMovement.TryMove(Vector3, MovementSource)` is the shared execution API. It accepts Manual or Autonomous sources without depending on selection, input devices, or role decisions.
@@ -46,7 +49,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 
 ## Current scope
 
-V1.3 supports four party members with individual orders, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. T7's [autonomous party AI](autonomous-party-ai.md) now uses the existing Autonomous source; movement execution retains its API and terminal states. Brains yield positioning during manual ownership, permit valid combat while moving, and evaluate fresh destinations after release. Selection remains independent. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
+V1.4 supports four party members and T8's mobile boss through the same executor, static arena obstacle avoidance, mutually passable characters, manual priority, and terminal command states. [Autonomous party AI](autonomous-party-ai.md) uses the existing Autonomous source for roles and reactions; movement execution retains its API and terminal states. Brains yield positioning during manual ownership, permit valid combat while moving, and evaluate fresh destinations after release. Selection remains independent. Group formations, queued orders, runtime obstacle rebaking, and off-mesh traversal authoring are outside this version.
 
 Navigation preserves elevation, but the current arena is flat. Multilevel targeting, slope presentation, and more complex terrain still need dedicated level validation. A shared marker shows only the most recent player request; it is feedback rather than a persistent marker for every moving unit.
 
@@ -64,6 +67,7 @@ Verified v1.1 on 2026-10-18 in Unity 6000.6.6f1: the automated Play-mode checks 
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.4 | 2026-10-21 | Reused the executor for boss movement and party hazard/chase reactions; corrected scaled feet offsets and added separate boss-clearance baking while preserving party navigation and manual terminal states. |
 | v1.3 | 2026-10-20 | Integrated independent role positioning through the existing Autonomous source; verified combat during manual movement, selection independence, ownership release and autonomous resume in T7's Play-mode suite. |
 | v1.2 | 2026-10-20 | Extended setup and regression checks to four party members; verified Ranged DPS movement and preserved customized arena geometry. |
 | v1.1 | 2026-10-18 | Made party members and boss mutually passable; removed unit separation, unit collisions, boss bake obstruction, and unit blocking of movement targeting. Added crossing and shared-destination checks. |

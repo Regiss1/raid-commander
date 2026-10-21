@@ -32,6 +32,7 @@ namespace RaidCommander.Combat
         public float RangedRange => stats != null ? stats.RangedRange : fallbackRangedRange;
         public float AttackSpeed => stats != null ? stats.AttackSpeed : CombatStatsDefinition.ValidAttackSpeed(fallbackAttackSpeed);
         public CombatUnit CurrentTarget { get; private set; }
+        public bool FacingLocked { get; set; }
         public event Action<CombatUnit> Died;
         public event Action<CombatUnit> HealthChanged;
 

@@ -843,6 +843,7 @@ MonoBehaviour:
   - {fileID: 615512142}
   - {fileID: 1568423918}
   - {fileID: 1035513437}
+  hazards: {fileID: 1003551809}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -1065,6 +1066,9 @@ GameObject:
   - component: {fileID: 419772311}
   - component: {fileID: 419772314}
   - component: {fileID: 419772315}
+  - component: {fileID: 419772318}
+  - component: {fileID: 419772317}
+  - component: {fileID: 419772316}
   m_Layer: 10
   m_Name: Raid Boss
   m_TagString: Untagged
@@ -1202,7 +1206,74 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.BossBasicAttack
   combat: {fileID: 1443734131}
   tank: {fileID: 338086625}
-  attackInterval: 2
+  party:
+  - {fileID: 338086625}
+  - {fileID: 615512142}
+  - {fileID: 1568423918}
+  - {fileID: 1035513437}
+  attackInterval: 3
+  forwardSpeed: 3
+  rangeTolerance: 0.35
+  decisionInterval: 0.2
+--- !u!114 &419772316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419772309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89115bbabc903d344ba3ce4a71c958fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Abilities.BossAbilityRunner
+  combat: {fileID: 1443734131}
+  boundary: {fileID: 1874410680}
+  hazards: {fileID: 1003551809}
+  presentation: {fileID: 1491753943}
+  party:
+  - {fileID: 338086626}
+  - {fileID: 615512143}
+  - {fileID: 1568423919}
+  - {fileID: 1035513447}
+  loadout:
+  - {fileID: 11400000, guid: 5c21a9409de9c16498df069515f7d643, type: 2}
+--- !u!114 &419772317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419772309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f64f3e9333c9ea546bf883dea9b9ce7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Movement.UnitMovement
+  destinationSnapDistance: 0.5
+  stalledTimeout: 6
+--- !u!195 &419772318
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419772309}
+  m_Enabled: 1
+  m_AgentTypeID: -1372625422
+  m_Radius: 0.9
+  m_Speed: 3
+  m_Acceleration: 18
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.08
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 0
 --- !u!1 &434457840
 GameObject:
   m_ObjectHideFlags: 0
@@ -1884,6 +1955,7 @@ MonoBehaviour:
   - {fileID: 615512142}
   - {fileID: 1568423918}
   - {fileID: 1035513437}
+  hazards: {fileID: 1003551809}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -2836,6 +2908,51 @@ Transform:
   - {fileID: 419772310}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1003551808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1003551810}
+  - component: {fileID: 1003551809}
+  m_Layer: 0
+  m_Name: Encounter Hazards
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1003551809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003551808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66d6f0e8e6693cc42ba863731de5db30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Abilities.GroundHazards
+  boundary: {fileID: 1874410680}
+--- !u!4 &1003551810
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003551808}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1035513436
 GameObject:
   m_ObjectHideFlags: 0
@@ -3182,6 +3299,7 @@ MonoBehaviour:
   - {fileID: 615512142}
   - {fileID: 1568423918}
   - {fileID: 1035513437}
+  hazards: {fileID: 1003551809}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -4105,6 +4223,109 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1491753942
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1491753946}
+  - component: {fileID: 1491753945}
+  - component: {fileID: 1491753944}
+  - component: {fileID: 1491753943}
+  m_Layer: 0
+  m_Name: Boss Ground Telegraph
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1491753943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491753942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7abd248338e0b24d98ca9a3358c4f21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Abilities.GroundHazardVisual
+--- !u!23 &1491753944
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491753942}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 361f9a248f05b514691ce11b2b8e5695, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1491753945
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491753942}
+  m_Mesh: {fileID: 0}
+--- !u!4 &1491753946
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491753942}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1566326400
 GameObject:
   m_ObjectHideFlags: 0
@@ -4219,6 +4440,70 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1566326400}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1566611879
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1566611881}
+  - component: {fileID: 1566611880}
+  m_Layer: 0
+  m_Name: Boss Navigation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1566611880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566611879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: -1372625422
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 257
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 1
+  m_VoxelSize: 0.1
+  m_MinRegionArea: 0.1
+  m_NavMeshData: {fileID: 23800000, guid: a2606672eb0578a4c8408f437ee38ce6, type: 2}
+  m_BuildHeightMesh: 1
+--- !u!4 &1566611881
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566611879}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1568423910
 GameObject:
   m_ObjectHideFlags: 0
@@ -4430,6 +4715,7 @@ MonoBehaviour:
   - {fileID: 615512142}
   - {fileID: 1568423918}
   - {fileID: 1035513437}
+  hazards: {fileID: 1003551809}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -4618,6 +4904,72 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1802721095}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1874410679
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1874410682}
+  - component: {fileID: 1874410681}
+  - component: {fileID: 1874410680}
+  m_Layer: 2
+  m_Name: Encounter Boundary
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1874410680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874410679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a64c3bcb18955d340b1408c384786e71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Encounters.ArenaBoundary
+--- !u!65 &1874410681
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874410679}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 33, y: 0.1, z: 33}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1874410682
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874410679}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2072116295
 GameObject:
   m_ObjectHideFlags: 0
@@ -4948,3 +5300,7 @@ SceneRoots:
   - {fileID: 1443734133}
   - {fileID: 1786974367}
   - {fileID: 1097871950}
+  - {fileID: 1874410682}
+  - {fileID: 1003551810}
+  - {fileID: 1491753946}
+  - {fileID: 1566611881}

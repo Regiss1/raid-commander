@@ -64,7 +64,7 @@ namespace RaidCommander.Verification
             else EditorApplication.isPlaying = false;
         }
 
-        private static IEnumerator Verify()
+        public static IEnumerator Verify()
         {
             PartyAiVerification.SuspendAutonomy();
             yield return null;

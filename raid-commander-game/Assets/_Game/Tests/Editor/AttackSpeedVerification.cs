@@ -24,6 +24,9 @@ namespace RaidCommander.Verification
             CombatUnit tank = Unit("Tank"), healer = Unit("Healer"), melee = Unit("DPS"), ranged = Unit("Ranged DPS"), boss = Unit("Raid Boss");
             CombatUnit[] party = { tank, healer, melee, ranged };
             CombatUnit[] units = { tank, healer, melee, ranged, boss };
+            var bossAgent = boss.GetComponent<NavMeshAgent>();
+            bool bossAgentEnabled = bossAgent.enabled;
+            bossAgent.enabled = false; // Coordinate fixtures isolate attack timing from navigation resnapping.
             Vector3[] positions = units.Select(u => u.transform.position).ToArray();
             int tankMaximum = tank.MaximumHealth;
             var originals = new List<CombatStatsDefinition>();
@@ -38,12 +41,13 @@ namespace RaidCommander.Verification
                 {
                     var settings = new SerializedObject(party[i]);
                     var original = (CombatStatsDefinition)settings.FindProperty("stats").objectReferenceValue;
-                    Check(original != null && original.AttackSpeed == 1f && party[i].AttackSpeed == 1f, party[i].name + " saved attack speed is not 1.");
+                    Check(original != null && original.AttackSpeed > 0f && !float.IsInfinity(party[i].AttackSpeed), party[i].name + " saved attack speed is invalid.");
                     Check(settings.FindProperty("fallbackAttackSpeed").floatValue == 1f, party[i].name + " fallback attack speed is not 1.");
                     originals.Add(original);
                     var copy = UnityEngine.Object.Instantiate(original);
                     copy.hideFlags = HideFlags.DontSave;
                     copies.Add(copy);
+                    SetSpeed(copy, 1f);
                     settings.FindProperty("stats").objectReferenceValue = copy;
                     settings.ApplyModifiedPropertiesWithoutUndo();
                 }
@@ -178,11 +182,10 @@ namespace RaidCommander.Verification
                 Vector3 bossPosition = boss.transform.position;
                 var bossAttack = boss.GetComponent<BossBasicAttack>();
                 bossAttack.enabled = true;
-                until = Time.time + 8f;
-                while (Hits(boss).Length < 3) { Check(Time.time < until, "Boss did not attack at its original rate."); yield return null; }
-                CheckIntervals(Hits(boss), 2f, "Boss interval independent of party stats");
-                Check(boss.transform.position == bossPosition, "Boss moved during timing checks.");
-                Debug.Log("ATTACK SPEED VERIFY PASS: three party attackers at 0.5/1/2/7 APS, protected hit continuity, healer/boss timing and immediate debug actions.");
+                until = Time.time + 11f;
+                while (Hits(boss).Length < 3) { Check(Time.time < until, "Boss did not attack at its T8 rate."); yield return null; }
+                CheckIntervals(Hits(boss), 3f, "T8 boss interval independent of party stats");
+                Debug.Log("ATTACK SPEED VERIFY PASS: three party attackers at 0.5/1/2/7 APS, protected hit continuity, separate healing/T8 boss timing and immediate debug actions.");
             }
             finally
             {
@@ -200,6 +203,7 @@ namespace RaidCommander.Verification
                 combat.ResetSession(units);
                 for (int i = 0; i < 4; i++) Warp(units[i], positions[i]);
                 boss.transform.position = positions[4];
+                bossAgent.enabled = bossAgentEnabled;
                 if (fallbackObject != null) UnityEngine.Object.Destroy(fallbackObject);
             }
 

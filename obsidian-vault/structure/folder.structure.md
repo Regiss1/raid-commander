@@ -46,6 +46,8 @@ The `Scripts` folders are organized by feature. Keep components small and compos
 
 Party combat stats now include validated attack speed, materialized on the four existing party assets through AI setup. Offensive scheduling belongs to `PartyRoleBrain`; debug combat entry points remain immediate. `AttackSpeedVerification` extends the combined AI runner with protected-damage continuity and player-frame cadence checks using temporary runtime stats copies.
 
+`Abilities/` now contains configurable boss definitions, per-boss cast/readiness execution, immutable clipped ground polygons, encounter-local pending hazards and independent mesh presentation. `Encounters/ArenaBoundary` supplies the explicit playable volume. The existing boss/party producers submit navigation and combat requests for mobile targeting and reactions. `BossEncounterSceneSetup` wires the current arena, and `BossNavigationSetup` maintains the separate boss-size profile and `Scenes/RaidBossNavMesh.asset` without replacing the party bake. `Data/BaseGame/Abilities/WallOfFlames.asset` is the sole production ability. `BossEncounterVerification` covers focused runtime fixtures, production timing and original-bar combat regression. See [boss abilities and hazards](../systems/boss-abilities-and-hazards.md).
+
 ## World conventions
 
 - This is a fully 3D Unity project. XZ is the horizontal gameplay plane; Y is elevation.

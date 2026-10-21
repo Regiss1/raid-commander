@@ -1,4 +1,5 @@
 using RaidCommander.Combat;
+using RaidCommander.Abilities;
 using RaidCommander.Movement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,7 +7,7 @@ using UnityEngine.AI;
 namespace RaidCommander.Units
 {
     public enum CombatRole { Tank, MeleeDps, RangedDps, Healer }
-    public enum RoleState { Idle, SeekingPosition, Fighting, Healing, Holding, ManualMove, NoReachablePosition, Dead }
+    public enum RoleState { Idle, SeekingPosition, Fighting, Healing, Holding, ManualMove, NoReachablePosition, Dead, Escaping, NoSafeExit, RetreatingToTank }
 
     /// <summary>Produces autonomous movement/combat requests; never owns selection or path execution.</summary>
     [DisallowMultipleComponent, RequireComponent(typeof(CombatUnit), typeof(UnitMovement))]
@@ -17,6 +18,7 @@ namespace RaidCommander.Units
         [SerializeField] private CombatUnit boss;
         [SerializeField] private CombatUnit tank;
         [SerializeField] private CombatUnit[] party;
+        [SerializeField] private GroundHazards hazards;
         [SerializeField, Min(0.05f)] private float decisionInterval = 0.2f;
         // Retain the serialized field for existing scene tuning; offensive timing now comes from stats.
         [SerializeField, Min(0.1f), Tooltip("Basic healing interval. Attacks use CombatUnit.AttackSpeed instead.")]
@@ -28,6 +30,10 @@ namespace RaidCommander.Units
         private UnitMovement movement;
         private NavMeshAgent agent;
         private float nextDecision, nextAction, nextPositionSearch, nextActionAttempt;
+        private BossBasicAttack bossController;
+        private BossAbilityRunner bossAbilities;
+        private int reactionCommand = -1;
+        private bool escaping;
 
         public RoleState State { get; private set; }
         public CombatRole Role => role;
@@ -38,6 +44,7 @@ namespace RaidCommander.Units
             unit = GetComponent<CombatUnit>();
             movement = GetComponent<UnitMovement>();
             agent = GetComponent<NavMeshAgent>();
+            if (boss != null) { bossController = boss.GetComponent<BossBasicAttack>(); bossAbilities = boss.GetComponent<BossAbilityRunner>(); }
         }
 
         private void OnEnable()
@@ -56,6 +63,7 @@ namespace RaidCommander.Units
 
         private void ResetDecisions()
         {
+            reactionCommand = -1; escaping = false;
             StopAutonomousMove();
             Target = null;
             nextDecision = nextAction = nextPositionSearch = nextActionAttempt = 0f;
@@ -73,7 +81,7 @@ namespace RaidCommander.Units
 
         private void TryAct()
         {
-            if (!unit.IsAlive || combat == null || boss == null || !boss.IsAlive || Target == null || !Target.IsAlive
+            if (!unit.IsAlive || combat == null || boss == null || !boss.isActiveAndEnabled || !boss.IsAlive || Target == null || !Target.IsAlive
                 || Time.time < nextAction || Time.time < nextActionAttempt) return;
             bool healing = role == CombatRole.Healer;
             float range = healing || role == CombatRole.RangedDps ? unit.RangedRange : unit.MeleeRange;
@@ -91,7 +99,7 @@ namespace RaidCommander.Units
         private void DecidePosition()
         {
             if (!unit.IsAlive) { StopAutonomousMove(); State = RoleState.Dead; Target = null; return; }
-            if (combat == null || boss == null || !boss.IsAlive)
+            if (combat == null || boss == null || !boss.isActiveAndEnabled || !boss.IsAlive)
             {
                 StopAutonomousMove(); Target = null; unit.SetTarget(null); State = movement.HasManualOverride ? RoleState.ManualMove : RoleState.Idle; return;
             }
@@ -106,6 +114,8 @@ namespace RaidCommander.Units
 
             // Manual movement owns positioning only. TryAct still runs independently each frame.
             if (movement.HasManualOverride) { State = RoleState.ManualMove; return; }
+
+            if (ReactToEncounter()) return;
 
             float desired = healing || role == CombatRole.RangedDps ? Mathf.Min(preferredDistance, range * 0.8f) : range * 0.75f;
             bool tooClose = healing ? CombatPositionSearch.PlanarDistance(transform.position, boss.transform.position) < safeBossDistance
@@ -127,7 +137,7 @@ namespace RaidCommander.Units
             State = RoleState.SeekingPosition;
             nextPositionSearch = Time.time + positionSearchInterval;
             if (!CombatPositionSearch.TryFind(agent, combat, positionTarget, range, desired,
-                healing ? boss : null, healing ? safeBossDistance : 0f, out Vector3 destination))
+                healing ? boss : null, healing ? safeBossDistance : 0f, out Vector3 destination, hazards))
             {
                 StopAutonomousMove(); State = RoleState.NoReachablePosition; return;
             }
@@ -146,6 +156,54 @@ namespace RaidCommander.Units
                     if (Injured(ally) && (patient == null || (float)ally.CurrentHealth / ally.MaximumHealth < (float)patient.CurrentHealth / patient.MaximumHealth))
                         patient = ally;
             return patient;
+        }
+
+        private bool ReactToEncounter()
+        {
+            if (hazards != null && hazards.Count > 0 && agent != null && agent.isOnNavMesh
+                && movement.State == MovementState.Moving && movement.Source == MovementSource.Autonomous
+                && !escaping && !hazards.PathIsSafe(agent.path, agent.radius + 0.15f)) StopAutonomousMove();
+            float clearance = agent != null ? agent.radius + 0.15f : 0.8f;
+            bool unsafeCenter = hazards != null && hazards.IsUnsafe(transform.position);
+            if (unsafeCenter || (escaping && hazards != null && hazards.IsUnsafe(transform.position, clearance)))
+            {
+                escaping = true;
+                State = RoleState.Escaping;
+                if (Time.time < nextPositionSearch) return true;
+                nextPositionSearch = Time.time + 0.2f;
+                if (!hazards.TryEscape(agent, out Vector3 exit)) { StopAutonomousMove(); State = RoleState.NoSafeExit; return true; }
+                MoveReaction(exit); return true;
+            }
+            escaping = false;
+            if (role != CombatRole.Tank && bossController != null && bossController.isActiveAndEnabled
+                && bossController.CombatTarget == unit && bossController.IsChasing
+                && (bossAbilities == null || !bossAbilities.IsCasting) && tank != null && tank.IsAlive)
+            {
+                State = RoleState.RetreatingToTank;
+                if (CombatPositionSearch.PlanarDistance(transform.position, tank.transform.position) < 0.5f) { StopReaction(); return true; }
+                if (Time.time < nextPositionSearch) return true;
+                nextPositionSearch = Time.time + 0.2f;
+                Vector3 feet = tank.transform.position;
+                if (tank.TryGetComponent(out NavMeshAgent tankAgent)) feet.y -= tankAgent.baseOffset;
+                var path = new NavMeshPath();
+                if (agent != null && agent.isOnNavMesh && agent.CalculatePath(feet, path) && path.status == NavMeshPathStatus.PathComplete
+                    && (hazards == null || (!hazards.IsUnsafe(feet, clearance) && hazards.PathIsSafe(path, clearance)))) MoveReaction(feet);
+                else { StopReaction(); State = RoleState.NoReachablePosition; }
+                return true;
+            }
+            StopReaction(); return false;
+        }
+        private void MoveReaction(Vector3 destination)
+        {
+            if (movement.State == MovementState.Moving && movement.CommandId == reactionCommand
+                && CombatPositionSearch.PlanarDistance(movement.Destination, destination) < 0.15f) return;
+            if (movement.TryMove(destination, MovementSource.Autonomous) == MoveResult.Accepted) reactionCommand = movement.CommandId;
+            else State = RoleState.NoSafeExit;
+        }
+        private void StopReaction()
+        {
+            if (movement.Source == MovementSource.Autonomous && movement.CommandId == reactionCommand) movement.Cancel();
+            reactionCommand = -1;
         }
 
         private static bool Injured(CombatUnit candidate) => candidate != null && candidate.IsAlive && candidate.CurrentHealth < candidate.MaximumHealth;

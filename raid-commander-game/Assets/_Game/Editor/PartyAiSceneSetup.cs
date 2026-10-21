@@ -15,7 +15,7 @@ namespace RaidCommander.EditorTools
             Scene scene = SceneManager.GetActiveScene();
             if (EditorApplication.isPlayingOrWillChangePlaymode || scene.path != ArenaMovementSetup.ScenePath)
                 throw new System.InvalidOperationException("Open RaidArena in Edit mode before configuring party AI.");
-            // Reuse existing owners; do not regenerate geometry or rebake navigation.
+            // Reuse existing owners/geometry; encounter setup creates only missing boss navigation data.
             CombatUnit Unit(string name)
             {
                 foreach (GameObject root in scene.GetRootGameObjects())
@@ -38,7 +38,7 @@ namespace RaidCommander.EditorTools
             Apply(scene, combat, Unit("Tank"), Unit("Healer"), Unit("DPS"), Unit("Ranged DPS"), boss);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("PARTY AI SETUP: saved four role brains, stationary boss and debug wiring.");
+            Debug.Log("PARTY AI SETUP: saved four role brains, mobile boss, ability loadout and debug wiring.");
         }
 
         public static void Apply(Scene scene, CombatSystem combat, CombatUnit tank, CombatUnit healer,
@@ -69,6 +69,7 @@ namespace RaidCommander.EditorTools
             settings.FindProperty("tank").objectReferenceValue = tank;
             settings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(attack);
+            BossEncounterSceneSetup.Apply(scene, combat, party, boss);
 
             void Configure(CombatUnit unit, CombatRole role, float distance)
             {

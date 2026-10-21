@@ -78,8 +78,10 @@ namespace RaidCommander.Verification
 
         public static void SuspendAutonomy()
         {
+            foreach (RaidCommander.Abilities.BossAbilityRunner runner in UnityEngine.Object.FindObjectsByType<RaidCommander.Abilities.BossAbilityRunner>()) runner.enabled = false;
             foreach (PartyRoleBrain brain in UnityEngine.Object.FindObjectsByType<PartyRoleBrain>()) brain.enabled = false;
             foreach (BossBasicAttack attack in UnityEngine.Object.FindObjectsByType<BossBasicAttack>()) attack.enabled = false;
+            foreach (BossBasicAttack attack in UnityEngine.Object.FindObjectsByType<BossBasicAttack>()) attack.GetComponent<UnitMovement>()?.Cancel();
         }
 
         private static IEnumerator Verify()
@@ -101,6 +103,11 @@ namespace RaidCommander.Verification
             CombatUnit[] party = { tank, healer, melee, ranged };
             PartyRoleBrain[] brains = party.Select(u => u.GetComponent<PartyRoleBrain>()).ToArray();
             var bossAttack = boss.GetComponent<BossBasicAttack>();
+            var bossAgent = boss.GetComponent<NavMeshAgent>();
+            bool bossAgentEnabled = bossAgent.enabled;
+            int originalBossMaximum = boss.MaximumHealth;
+            // Keep this regression fixture short independently of requester-authored production balance.
+            boss.SetMaximumHealth(500);
             Vector3[] original = units.Select(u => u.transform.position).ToArray();
             var events = new List<ResolvedCombatEvent>();
             Action<ResolvedCombatEvent> record = e => events.Add(e);
@@ -111,7 +118,7 @@ namespace RaidCommander.Verification
                 Check(!combat.KeepBossAlive, "Boss protection must default off.");
                 Reset();
                 foreach (PartyRoleBrain brain in brains) brain.enabled = true;
-                bossAttack.enabled = true;
+                bossAgent.enabled = true; bossAttack.enabled = true;
                 float deadline = Time.time + 45f;
                 while (boss.IsAlive)
                 {
@@ -145,14 +152,14 @@ namespace RaidCommander.Verification
                 Check(!boss.IsAlive && events.Count(e => e.Type == CombatEventType.UnitDied) == 1, "Disabling protection failed to restore normal death.");
 
                 Reset();
-                bossAttack.enabled = true;
+                bossAgent.enabled = true; bossAttack.enabled = true;
                 Warp(tank, boss.transform.position + Vector3.back * 8f);
                 int health = tank.CurrentHealth;
                 until = Time.time + 2.3f;
                 while (Time.time < until) yield return null;
                 Check(tank.CurrentHealth == health, "Stationary boss hit out of melee range.");
                 Warp(tank, boss.transform.position + Vector3.back * 1f);
-                deadline = Time.time + 2.5f;
+                deadline = Time.time + 3.5f;
                 while (tank.CurrentHealth == health) { Check(Time.time < deadline, "Boss did not attack in melee range."); yield return null; }
                 count = events.Count;
                 until = Time.time + 1f;
@@ -162,8 +169,7 @@ namespace RaidCommander.Verification
                 count = events.Count;
                 until = Time.time + 2.3f;
                 while (Time.time < until) yield return null;
-                Check(events.Count == count && bossAttack.State == "Idle", "Boss continued attacking a dead Tank.");
-                Check(Vector3.Distance(boss.transform.position, original[4]) < 0.01f, "Boss moved.");
+                Check(!events.Skip(count).Any(e => e.Target == tank && e.Damage > 0) && bossAttack.CombatTarget != tank, "Boss retained a dead Tank.");
 
                 Reset();
                 Warp(tank, new Vector3(-8f, 0f, -10f));
@@ -253,7 +259,7 @@ namespace RaidCommander.Verification
                 Reset();
                 combat.KeepBossAlive = true;
                 foreach (PartyRoleBrain brain in brains) brain.enabled = true;
-                bossAttack.enabled = true;
+                bossAgent.enabled = true; bossAttack.enabled = true;
                 until = Time.time + 3f;
                 while (Time.time < until) yield return null;
                 combat.ApplyDamage(null, ranged, int.MaxValue);
@@ -275,16 +281,20 @@ namespace RaidCommander.Verification
             finally
             {
                 SuspendAutonomy();
+                boss.SetMaximumHealth(originalBossMaximum);
                 combat.KeepBossAlive = false;
                 combat.EventResolved -= record;
                 combat.ResetSession(units);
                 for (int i = 0; i < units.Length; i++)
                     if (i < 4) Warp(units[i], original[i]); else units[i].transform.position = original[i];
+                bossAgent.enabled = bossAgentEnabled;
             }
 
             void Reset()
             {
                 SuspendAutonomy();
+                // Off-mesh/sight fixtures move the old boss placeholder directly; prevent agent resnapping.
+                bossAgent.enabled = false;
                 combat.KeepBossAlive = false;
                 combat.ResetSession(units);
                 for (int i = 0; i < units.Length; i++)
@@ -296,6 +306,7 @@ namespace RaidCommander.Verification
 
         private static void Warp(CombatUnit unit, Vector3 position)
         {
+            position.y = 0f;
             var mover = unit.GetComponent<UnitMovement>();
             mover.Cancel();
             var agent = unit.GetComponent<NavMeshAgent>();

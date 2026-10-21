@@ -105,8 +105,9 @@ namespace RaidCommander.Verification
             var input = camera.GetComponent<PlayerMovementInput>();
             var marker = GameObject.Find("Destination Marker").GetComponent<DestinationMarker>();
             UnitMovement[] party = { tank, healer, dps, rangedDps };
-            Check(UnityEngine.Object.FindObjectsByType<UnitMovement>(FindObjectsSortMode.None).Length == 4,
-                "Expected exactly four independent movers.");
+            Check(UnityEngine.Object.FindObjectsByType<UnitMovement>(FindObjectsSortMode.None).Length == 5
+                && GameObject.Find("Raid Boss").GetComponent<UnitMovement>() != null,
+                "Expected four party movers and T8's independent boss mover.");
             foreach (UnitMovement unit in party)
             {
                 Check(unit.GetComponent<NavMeshAgent>().isOnNavMesh, unit.name + " is off the baked NavMesh.");

@@ -91,7 +91,7 @@ namespace RaidCommander.Movement
             if (!agent.pathPending)
             {
                 // The placeholders have centered pivots. baseOffset keeps their feet on the mesh.
-                Vector3 feet = transform.position - Vector3.up * agent.baseOffset;
+                Vector3 feet = transform.position - Vector3.up * (agent.baseOffset * Mathf.Abs(transform.lossyScale.y));
                 float arrivalDistance = agent.stoppingDistance + 0.05f;
                 bool atDestination = Vector3.Distance(feet, Destination) <= arrivalDistance;
                 bool pathArrived = agent.hasPath && agent.pathStatus == NavMeshPathStatus.PathComplete

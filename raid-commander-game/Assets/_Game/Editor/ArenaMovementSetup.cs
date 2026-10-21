@@ -23,6 +23,8 @@ namespace RaidCommander.EditorTools
                 return;
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             Apply(scene);
+            var boss = Require(scene, "Raid Boss").GetComponent<RaidCommander.Combat.CombatUnit>();
+            if (boss != null && boss.GetComponent<RaidCommander.Abilities.BossAbilityRunner>() != null) BossNavigationSetup.Apply(scene, boss, true);
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
                 throw new InvalidOperationException("Could not save the arena movement setup.");

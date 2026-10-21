@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21d6f3126a5874647aa92ecea03c6d1b, type: 3}
+  m_Name: WallOfFlames
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Abilities.BossAbilityDefinition
+  AbilityId: 1
+  DisplayName: Wall of Flames
+  TriggerMode: 0
+  InitialDelaySeconds: 90
+  IntervalSeconds: 90
+  CooldownSeconds: 0
+  HealthThresholdPercent: 50
+  Damage: 95
+  CastTimeSeconds: 3
+  AllowedTargetRoles: -1
+  TargetRangeMode: 0
+  TargetRange: 20
+  DeliveryMode: 0
+  Shape: 0
+  Width: 4
+  Length: 10
+  LengthMode: 1
+  LockFacingOnCastStart: 1
+  StopMovementDuringCast: 1
+  SuppressAutoAttacksDuringCast: 1
+  ShowTelegraph: 1
+  TelegraphColor: {r: 1, g: 0.8, b: 0.05, a: 0.65}
+  ImpactColor: {r: 1, g: 0.08, b: 0.03, a: 0.8}
+  ImpactDuration: 0.35

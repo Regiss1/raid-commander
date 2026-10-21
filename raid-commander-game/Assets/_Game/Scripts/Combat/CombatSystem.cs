@@ -87,7 +87,7 @@ namespace RaidCommander.Combat
         }
 
         public int ApplyDamage(CombatUnit source, CombatUnit target, int amount,
-            CombatEventType eventType = CombatEventType.SwingDamage)
+            CombatEventType eventType = CombatEventType.SwingDamage, int? spellId = null)
         {
             if (target == null || !target.IsAlive || amount <= 0 || (source != null && !source.IsAlive))
                 return 0;
@@ -98,9 +98,9 @@ namespace RaidCommander.Combat
             if (reportedDamage <= 0)
                 return 0;
 
-            Publish(new ResolvedCombatEvent(eventType, source, target, damage: reportedDamage));
+            Publish(new ResolvedCombatEvent(eventType, source, target, spellId: spellId, damage: reportedDamage));
             if (!target.IsAlive)
-                Publish(new ResolvedCombatEvent(CombatEventType.UnitDied, source, target));
+                Publish(new ResolvedCombatEvent(CombatEventType.UnitDied, source, target, spellId: spellId));
             return reportedDamage;
         }
 
@@ -126,6 +126,13 @@ namespace RaidCommander.Combat
         private bool CanActOn(CombatUnit source, CombatUnit target) =>
             source != null && target != null && source != target && source.IsAlive && target.IsAlive;
 
+        public void PublishCast(CombatEventType type, CombatUnit source, CombatUnit target, int spellId)
+        {
+            if (source == null || spellId <= 0 || (type != CombatEventType.SpellCastStart
+                && type != CombatEventType.SpellCastSuccess && type != CombatEventType.SpellCastFailed)) return;
+            Publish(new ResolvedCombatEvent(type, source, target, spellId: spellId));
+        }
+
         private void Publish(ResolvedCombatEvent combatEvent)
         {
             EventResolved?.Invoke(combatEvent);
@@ -141,6 +148,7 @@ namespace RaidCommander.Combat
 
         private static void FaceTarget(CombatUnit source, CombatUnit target)
         {
+            if (source.FacingLocked) return;
             Vector3 direction = target.transform.position - source.transform.position;
             direction.y = 0f;
             if (direction.sqrMagnitude > 0.0001f)

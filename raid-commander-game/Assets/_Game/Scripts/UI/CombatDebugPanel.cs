@@ -1,6 +1,7 @@
 using System.Text;
 using RaidCommander.Combat;
 using RaidCommander.Units;
+using RaidCommander.Abilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,6 +24,7 @@ namespace RaidCommander.UI
         private readonly StringBuilder builder = new StringBuilder(1600);
         private PartyRoleBrain[] brains;
         private BossBasicAttack bossAttack;
+        private BossAbilityRunner bossAbilities;
 
         private void Awake()
         {
@@ -31,6 +33,7 @@ namespace RaidCommander.UI
             brains = new PartyRoleBrain[party.Length];
             for (int i = 0; i < party.Length; i++) brains[i] = party[i] != null ? party[i].GetComponent<PartyRoleBrain>() : null;
             bossAttack = boss != null ? boss.GetComponent<BossBasicAttack>() : null;
+            bossAbilities = boss != null ? boss.GetComponent<BossAbilityRunner>() : null;
         }
         private void OnEnable() => toggleAction?.Enable();
         private void OnDisable() => toggleAction?.Disable();
@@ -59,7 +62,10 @@ namespace RaidCommander.UI
                 foreach (PartyRoleBrain brain in brains)
                     if (brain != null) GUILayout.Label(brain.name + ": " + brain.State
                         + (brain.Target != null ? " -> " + brain.Target.name : ""));
-            if (bossAttack != null) GUILayout.Label("Boss: " + bossAttack.State);
+            if (bossAttack != null) GUILayout.Label("Boss: " + bossAttack.State + (bossAttack.CombatTarget != null ? " -> " + bossAttack.CombatTarget.name : ""));
+            if (bossAbilities != null && bossAbilities.IsCasting) GUILayout.Label(bossAbilities.ActiveDefinition.DisplayName
+                + "  " + Mathf.Max(0f, bossAbilities.CastEndsAt - Time.time).ToString("F1") + "s");
+            if (bossAbilities != null && !string.IsNullOrEmpty(bossAbilities.SetupError)) GUILayout.Label(bossAbilities.SetupError);
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Melee: Tank to Boss")) actions?.TankMelee();
@@ -92,6 +98,7 @@ namespace RaidCommander.UI
             builder.Append(entry.Timestamp.ToString("F1")).Append("  ");
             builder.Append(NameFor(entry.SourceId)).Append(" -> ").Append(NameFor(entry.TargetId));
             builder.Append("  ").Append(entry.Type);
+            if (entry.SpellId.HasValue) builder.Append("  spell:").Append(entry.SpellId.Value);
             if (entry.Damage.HasValue) builder.Append("  -").Append(entry.Damage.Value);
             if (entry.Healing.HasValue) builder.Append("  +").Append(entry.Healing.Value);
             return builder.ToString();

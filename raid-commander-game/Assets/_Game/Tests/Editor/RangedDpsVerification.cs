@@ -113,7 +113,8 @@ namespace RaidCommander.Verification
                     Check(EditorApplication.timeSinceStartup < deadline, "Ranged DPS movement did not finish.");
                     yield return null;
                 }
-                Check(movement.State == MovementState.Completed && !movement.HasManualOverride, "Ranged movement ownership did not end.");
+                Check(movement.State == MovementState.Completed && !movement.HasManualOverride,
+                    $"Ranged movement ended as {movement.State}: position={ranged.transform.position}, destination={movement.Destination}, remaining={agent.remainingDistance}, velocity={agent.velocity}.");
                 Check(Vector3.Distance(bar.transform.position, ranged.transform.position + Vector3.up * 1.8f) < 0.03f,
                     "Ranged health bar did not follow movement.");
 
