@@ -18,14 +18,16 @@ namespace RaidCommander.Units
         [SerializeField] private CombatUnit tank;
         [SerializeField] private CombatUnit[] party;
         [SerializeField, Min(0.05f)] private float decisionInterval = 0.2f;
-        [SerializeField, Min(0.1f)] private float actionInterval = 1.5f;
+        // Retain the serialized field for existing scene tuning; offensive timing now comes from stats.
+        [SerializeField, Min(0.1f), Tooltip("Basic healing interval. Attacks use CombatUnit.AttackSpeed instead.")]
+        private float actionInterval = 1.5f;
         [SerializeField, Min(0.2f)] private float positionSearchInterval = 0.8f;
         [SerializeField, Min(0f)] private float preferredDistance = 12f;
         [SerializeField, Min(0f)] private float safeBossDistance = 6f;
         private CombatUnit unit;
         private UnitMovement movement;
         private NavMeshAgent agent;
-        private float nextDecision, nextAction, nextPositionSearch;
+        private float nextDecision, nextAction, nextPositionSearch, nextActionAttempt;
 
         public RoleState State { get; private set; }
         public CombatRole Role => role;
@@ -40,7 +42,7 @@ namespace RaidCommander.Units
 
         private void OnEnable()
         {
-            nextDecision = nextAction = nextPositionSearch = 0f;
+            nextDecision = nextAction = nextPositionSearch = nextActionAttempt = 0f;
             if (combat != null) combat.SessionReset += ResetDecisions;
         }
 
@@ -56,13 +58,38 @@ namespace RaidCommander.Units
         {
             StopAutonomousMove();
             Target = null;
-            nextDecision = nextAction = nextPositionSearch = 0f;
+            nextDecision = nextAction = nextPositionSearch = nextActionAttempt = 0f;
         }
 
         private void Update()
         {
-            if (Time.time < nextDecision) return;
-            nextDecision = Time.time + decisionInterval;
+            if (Time.time >= nextDecision)
+            {
+                nextDecision = Time.time + decisionInterval;
+                DecidePosition();
+            }
+            TryAct();
+        }
+
+        private void TryAct()
+        {
+            if (!unit.IsAlive || combat == null || boss == null || !boss.IsAlive || Target == null || !Target.IsAlive
+                || Time.time < nextAction || Time.time < nextActionAttempt) return;
+            bool healing = role == CombatRole.Healer;
+            float range = healing || role == CombatRole.RangedDps ? unit.RangedRange : unit.MeleeRange;
+            if (CombatPositionSearch.PlanarDistance(transform.position, Target.transform.position) > range) return;
+            // Retry rejected actions with the decision cadence; successful actions are scheduled per frame.
+            nextActionAttempt = Time.time + decisionInterval;
+            if (!combat.HasLineOfSight(transform.position, Target.transform.position)) return;
+            bool acted = healing ? combat.TryHeal(unit, Target) : role == CombatRole.RangedDps
+                ? combat.TryRangedAttack(unit, Target) : combat.TryMeleeAttack(unit, Target);
+            if (!acted) return;
+            nextAction = Time.time + (healing ? actionInterval : 1f / unit.AttackSpeed);
+            nextActionAttempt = 0f;
+        }
+
+        private void DecidePosition()
+        {
             if (!unit.IsAlive) { StopAutonomousMove(); State = RoleState.Dead; Target = null; return; }
             if (combat == null || boss == null || !boss.IsAlive)
             {
@@ -77,13 +104,7 @@ namespace RaidCommander.Units
             bool clear = combat.HasLineOfSight(transform.position, positionTarget.transform.position);
             bool inRange = distance <= range;
 
-            // Manual movement owns positioning only; valid actions may still resolve while moving.
-            if (Target != null && inRange && clear && Time.time >= nextAction)
-            {
-                bool acted = healing ? combat.TryHeal(unit, Target) : role == CombatRole.RangedDps
-                    ? combat.TryRangedAttack(unit, Target) : combat.TryMeleeAttack(unit, Target);
-                if (acted) nextAction = Time.time + actionInterval;
-            }
+            // Manual movement owns positioning only. TryAct still runs independently each frame.
             if (movement.HasManualOverride) { State = RoleState.ManualMove; return; }
 
             float desired = healing || role == CombatRole.RangedDps ? Mathf.Min(preferredDistance, range * 0.8f) : range * 0.75f;

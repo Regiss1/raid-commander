@@ -133,10 +133,11 @@ namespace RaidCommander.Verification
 
                 Reset();
                 combat.KeepBossAlive = true;
-                Check(combat.ApplyDamage(tank, boss, int.MaxValue) == boss.MaximumHealth - 1 && boss.CurrentHealth == 1 && boss.IsAlive,
+                Check(combat.ApplyDamage(tank, boss, int.MaxValue) == int.MaxValue && boss.CurrentHealth == 1 && boss.IsAlive,
                     "Boss damage floor failed.");
                 count = events.Count;
-                Check(combat.ApplyDamage(tank, boss, 20) == 0 && events.Count == count, "Damage at floor produced an effective outcome.");
+                Check(combat.ApplyDamage(tank, boss, 20) == 20 && events.Count == count + 1 && events[events.Count - 1].Damage == 20,
+                    "Protected hit did not report normal damage at the health floor.");
                 UnityEngine.Object.FindAnyObjectByType<CombatDebugActions>().KillBoss();
                 Check(boss.CurrentHealth == 1 && !events.Any(e => e.Type == CombatEventType.UnitDied), "Debug kill bypassed boss protection.");
                 combat.KeepBossAlive = false;
@@ -264,6 +265,12 @@ namespace RaidCommander.Verification
                 deadline = Time.time + 12f;
                 while (!events.Any(e => e.Source == ranged && e.Damage > 0 && e.Target == boss))
                 { Check(Time.time < deadline, "Reset did not restore AI combat."); yield return null; }
+                IEnumerator revisionChecks = AttackSpeedVerification.Verify();
+                try
+                {
+                    while (revisionChecks.MoveNext()) yield return null;
+                }
+                finally { (revisionChecks as IDisposable)?.Dispose(); }
             }
             finally
             {

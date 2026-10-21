@@ -821,6 +821,7 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
+  fallbackAttackSpeed: 1
 --- !u!114 &338086626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1186,6 +1187,7 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 3.5
   fallbackRangedRange: 4
+  fallbackAttackSpeed: 1
 --- !u!114 &419772315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1860,6 +1862,7 @@ MonoBehaviour:
   fallbackBasicHealing: 25
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 18
+  fallbackAttackSpeed: 1
 --- !u!114 &615512143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2879,6 +2882,7 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
+  fallbackAttackSpeed: 1
 --- !u!114 &1035513438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4404,6 +4408,7 @@ MonoBehaviour:
   fallbackBasicHealing: 20
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
+  fallbackAttackSpeed: 1
 --- !u!114 &1568423919
 MonoBehaviour:
   m_ObjectHideFlags: 0

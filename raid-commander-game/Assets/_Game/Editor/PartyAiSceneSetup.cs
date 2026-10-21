@@ -45,6 +45,19 @@ namespace RaidCommander.EditorTools
             CombatUnit dps, CombatUnit rangedDps, CombatUnit boss)
         {
             CombatUnit[] party = { tank, healer, dps, rangedDps };
+            foreach (CombatUnit unit in party)
+            {
+                var unitSettings = new SerializedObject(unit);
+                var stats = unitSettings.FindProperty("stats").objectReferenceValue as CombatStatsDefinition;
+                if (stats == null) continue;
+                var statsSettings = new SerializedObject(stats);
+                var speed = statsSettings.FindProperty("attackSpeed");
+                speed.floatValue = CombatStatsDefinition.ValidAttackSpeed(speed.floatValue);
+                statsSettings.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(stats);
+                // Save only these stats assets, preserving unrelated unsaved Editor assets.
+                AssetDatabase.SaveAssetIfDirty(stats);
+            }
             Configure(tank, CombatRole.Tank, 0f);
             Configure(healer, CombatRole.Healer, 12f);
             Configure(dps, CombatRole.MeleeDps, 0f);

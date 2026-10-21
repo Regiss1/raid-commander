@@ -44,6 +44,8 @@ The `Scripts` folders are organized by feature. Keep components small and compos
 
 `Units/` contains `PartyRoleBrain`, `BossBasicAttack` and the bounded `CombatPositionSearch` helper. They own decisions independently of movement execution and combat resolution. `PartyAiSceneSetup` wires the existing arena without rebuilding geometry; full combat setup also calls this wiring. `PartyAiVerification` exercises unattended encounters and manual overrides in real Play mode. See [autonomous party AI](../systems/autonomous-party-ai.md).
 
+Party combat stats now include validated attack speed, materialized on the four existing party assets through AI setup. Offensive scheduling belongs to `PartyRoleBrain`; debug combat entry points remain immediate. `AttackSpeedVerification` extends the combined AI runner with protected-damage continuity and player-frame cadence checks using temporary runtime stats copies.
+
 ## World conventions
 
 - This is a fully 3D Unity project. XZ is the horizontal gameplay plane; Y is elevation.

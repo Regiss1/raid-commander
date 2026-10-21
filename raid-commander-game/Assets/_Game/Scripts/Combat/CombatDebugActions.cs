@@ -53,8 +53,7 @@ namespace RaidCommander.Combat
                 return;
             }
 
-            int healthBefore = boss.CurrentHealth;
-            if (!combat.TryRangedAttack(rangedDps, boss, out CombatActionFailure failure))
+            if (!combat.TryRangedAttack(rangedDps, boss, out CombatActionFailure failure, out int reportedDamage))
             {
                 LastStatus = failure == CombatActionFailure.LineOfSight
                     ? "Ranged DPS failed because of line of sight"
@@ -62,7 +61,7 @@ namespace RaidCommander.Combat
                 return;
             }
 
-            LastStatus = $"Ranged DPS hit the boss for {healthBefore - boss.CurrentHealth}.";
+            LastStatus = $"Ranged DPS hit the boss for {reportedDamage}.";
         }
 
         public void DamageTank()
@@ -98,7 +97,7 @@ namespace RaidCommander.Combat
             }
             int effectiveDamage = combat.ApplyDamage(tank, boss, boss.CurrentHealth);
             LastStatus = effectiveDamage > 0
-                ? "Tank defeated the boss. Reset the encounter to continue."
+                ? boss.IsAlive ? "Boss protection kept the boss at 1 health." : "Tank defeated the boss. Reset the encounter to continue."
                 : "No damage was applied. Check whether the boss is already defeated.";
         }
 
@@ -121,15 +120,13 @@ namespace RaidCommander.Combat
                 return;
             }
 
-            int healthBefore = boss.CurrentHealth;
-            if (!combat.TryMeleeAttack(source, boss))
+            if (!combat.TryMeleeAttack(source, boss, out int reportedDamage))
             {
                 LastStatus = DescribeRejectedAction(source, boss, source.MeleeRange, "melee attack");
                 return;
             }
 
-            int effectiveDamage = healthBefore - boss.CurrentHealth;
-            LastStatus = $"{sourceName} hit the boss for {effectiveDamage}.";
+            LastStatus = $"{sourceName} hit the boss for {reportedDamage}.";
         }
 
         private static string DescribeRejectedAction(CombatUnit source, CombatUnit target, float range, string action)

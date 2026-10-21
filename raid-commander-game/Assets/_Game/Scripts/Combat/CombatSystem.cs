@@ -20,22 +20,29 @@ namespace RaidCommander.Combat
 
         public bool HasLineOfSight(Vector3 source, Vector3 target) => lineOfSight.IsClear(obstacleRoot, source, target);
 
-        public bool TryMeleeAttack(CombatUnit source, CombatUnit target)
+        public bool TryMeleeAttack(CombatUnit source, CombatUnit target) => TryMeleeAttack(source, target, out _);
+
+        public bool TryMeleeAttack(CombatUnit source, CombatUnit target, out int reportedDamage)
         {
+            reportedDamage = 0;
             if (!CanActOn(source, target) || source.Faction == target.Faction
                 || PlanarDistance(source.transform.position, target.transform.position) > source.MeleeRange)
                 return false;
 
             source.SetTarget(target);
             FaceTarget(source, target);
-            ApplyDamage(source, target, source.BasicDamage, CombatEventType.SwingDamage);
+            reportedDamage = ApplyDamage(source, target, source.BasicDamage, CombatEventType.SwingDamage);
             return true;
         }
 
         public bool TryRangedAttack(CombatUnit source, CombatUnit target) => TryRangedAttack(source, target, out _);
 
         public bool TryRangedAttack(CombatUnit source, CombatUnit target, out CombatActionFailure failure)
+            => TryRangedAttack(source, target, out failure, out _);
+
+        public bool TryRangedAttack(CombatUnit source, CombatUnit target, out CombatActionFailure failure, out int reportedDamage)
         {
+            reportedDamage = 0;
             failure = CombatActionFailure.InvalidRequest;
             if (!CanActOn(source, target) || source.Faction == target.Faction
                 || PlanarDistance(source.transform.position, target.transform.position) > source.RangedRange)
@@ -49,7 +56,8 @@ namespace RaidCommander.Combat
 
             source.SetTarget(target);
             FaceTarget(source, target);
-            bool applied = ApplyDamage(source, target, source.BasicDamage, CombatEventType.RangedDamage) > 0;
+            reportedDamage = ApplyDamage(source, target, source.BasicDamage, CombatEventType.RangedDamage);
+            bool applied = reportedDamage > 0;
             failure = applied ? CombatActionFailure.None : CombatActionFailure.NoEffect;
             return applied;
         }
@@ -83,17 +91,17 @@ namespace RaidCommander.Combat
         {
             if (target == null || !target.IsAlive || amount <= 0 || (source != null && !source.IsAlive))
                 return 0;
-            // Development damage floor belongs in resolution so every damage producer agrees.
-            if (KeepBossAlive && target == debugBoss)
-                amount = Mathf.Min(amount, Mathf.Max(0, target.CurrentHealth - 1));
-            int effective = target.ApplyDamage(amount);
-            if (effective <= 0)
+            // Protection changes health loss only. A valid hit still resolves, logs and presents normally.
+            bool protectedBoss = KeepBossAlive && target == debugBoss;
+            int healthLoss = target.ApplyDamage(protectedBoss ? Mathf.Min(amount, Mathf.Max(0, target.CurrentHealth - 1)) : amount);
+            int reportedDamage = protectedBoss ? amount : healthLoss;
+            if (reportedDamage <= 0)
                 return 0;
 
-            Publish(new ResolvedCombatEvent(eventType, source, target, damage: effective));
+            Publish(new ResolvedCombatEvent(eventType, source, target, damage: reportedDamage));
             if (!target.IsAlive)
                 Publish(new ResolvedCombatEvent(CombatEventType.UnitDied, source, target));
-            return effective;
+            return reportedDamage;
         }
 
         public int ApplyHealing(CombatUnit source, CombatUnit target, int amount)

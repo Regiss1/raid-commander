@@ -17,3 +17,4 @@ MonoBehaviour:
   basicHealing: 20
   meleeRange: 2.5
   rangedRange: 4
+  attackSpeed: 1

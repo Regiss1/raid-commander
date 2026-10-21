@@ -89,6 +89,14 @@ Acceptance criteria:
 - The Editor initially held unsaved four-party health-bar heights of five pixels and Tank stats with melee range 2 / ranged range 60. Those values were preserved when the scene/assets were saved. The four `screenHeight: 10 -> 5` scene hunks and `TankCombatStats.asset` changes remain requester-owned, outside T7's eventual commit scope. A pre-AI scene copy is in ignored `Logs/t7-before-ai.unity`.
 - No commit, push, merge or issue closure is authorized by this implementation handoff. The issue stays open awaiting task-specific review.
 
+## Required scope revision
+
+- [T7.1 - Protected boss combat and attack-speed stats](T7.1-protected-boss-combat-and-attack-speed-stats.md), tracked in [issue #12](https://github.com/Regiss1/raid-commander/issues/12), is required before T7 can be accepted/completed, as confirmed by the requester during review.
+- T7 is blocked by T7.1. T7 stays open with `task:awaiting-review`; T7.1 was recorded as planned and is now implemented, open with `task:awaiting-review`. No reciprocal dependency is introduced.
+- Planned changes: keep successful attacks, normal damage logs and ranged feedback active at the protected one-health floor; add party attack-speed stats initialized to one attack per second for automated attacks. Preserve separate healer healing at 1.5 seconds, stationary boss attacks at two seconds, and immediate debug attack/heal buttons.
+- This relationship is planning only. T7's original objective, acceptance baseline, implementation checkpoint and approval boundary above remain intact. T7.1 implementation requires a later explicit request; neither task is approved for commit/push by revision planning.
+- Implementation update (2026-10-20): the requester subsequently asked to implement T7.1. Its protected-hit reporting, party attack-speed stats, preserved healing/boss/debug timing, setup and Play-mode checks are implemented and verified in the linked revision record. Both tasks remain uncommitted and awaiting review; T7's blocker stays in place until T7.1 is separately approved, committed, pushed and completed. T7's original checkpoint above is preserved as its historical review baseline.
+
 ## Requester approval (2026-10-20)
 
 - The requester explicitly approved both reviewed tasks: "T7 and T7.1 OK". This authorizes separate task commits and a normal push to `feature/sprint-1/base-game`; complete T7.1 before T7 to resolve the recorded blocker.
