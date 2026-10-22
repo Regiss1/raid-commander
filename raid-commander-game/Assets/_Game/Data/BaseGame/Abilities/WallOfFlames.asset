@@ -15,15 +15,15 @@ MonoBehaviour:
   AbilityId: 1
   DisplayName: Wall of Flames
   TriggerMode: 0
-  InitialDelaySeconds: 90
-  IntervalSeconds: 90
+  InitialDelaySeconds: 5
+  IntervalSeconds: 15
   CooldownSeconds: 0
-  HealthThresholdPercent: 50
+  HealthThresholdPercent: 20
   Damage: 95
-  CastTimeSeconds: 3
+  CastTimeSeconds: 2
   AllowedTargetRoles: -1
   TargetRangeMode: 0
-  TargetRange: 20
+  TargetRange: 40
   DeliveryMode: 0
   Shape: 0
   Width: 4
