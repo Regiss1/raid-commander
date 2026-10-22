@@ -53,7 +53,6 @@ namespace RaidCommander.EditorTools
             RangedDpsSceneSetup.ConfigureTracer(rangedDps, combat);
 
             GameObject panelObject = FindOrCreate(scene, "Combat Debug Panel");
-            var panel = GetOrAdd<CombatDebugPanel>(panelObject);
             var actions = GetOrAdd<CombatDebugActions>(panelObject);
             var actionSettings = new SerializedObject(actions);
             actionSettings.FindProperty("combat").objectReferenceValue = combat;
@@ -65,17 +64,8 @@ namespace RaidCommander.EditorTools
             actionSettings.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(actions);
 
-            var panelSettings = new SerializedObject(panel);
-            panelSettings.FindProperty("log").objectReferenceValue = log;
-            panelSettings.FindProperty("actions").objectReferenceValue = actions;
-            panelSettings.FindProperty("tank").objectReferenceValue = tank;
-            panelSettings.FindProperty("healer").objectReferenceValue = healer;
-            panelSettings.FindProperty("dps").objectReferenceValue = dps;
-            panelSettings.FindProperty("rangedDps").objectReferenceValue = rangedDps;
-            panelSettings.FindProperty("boss").objectReferenceValue = boss;
-            panelSettings.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(panel);
             PartyAiSceneSetup.Apply(scene, combat, tank, healer, dps, rangedDps, boss);
+            CombatHudSceneSetup.Apply(scene);
         }
 
         private static CombatUnit ConfigureUnit(GameObject target, int id, CombatFaction faction, Camera camera,
@@ -121,6 +111,8 @@ namespace RaidCommander.EditorTools
 
             Image background = FindOrCreateImage(hudObject.transform, "Boss Health Bar",
                 new Color(0.06f, 0.06f, 0.06f, 0.92f));
+            background.raycastTarget = true;
+            GetOrAdd<GraphicRaycaster>(hudObject);
             RectTransform barRect = background.rectTransform;
             barRect.anchorMin = new Vector2(0.5f, 1f);
             barRect.anchorMax = new Vector2(0.5f, 1f);

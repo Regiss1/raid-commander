@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using RaidCommander.UI;
 
 namespace RaidCommander.CameraControl
 {
@@ -78,7 +79,8 @@ namespace RaidCommander.CameraControl
             targetPosition += (groundRight * input.x + groundForward * input.y) * (panSpeed * Time.unscaledDeltaTime);
 
             float scroll = zoomAction.ReadValue<Vector2>().y;
-            if (Mathf.Abs(scroll) > 0.01f)
+            if (Mathf.Abs(scroll) > 0.01f
+                && (Mouse.current == null || !UiPointerBlocker.Contains(Mouse.current.position.ReadValue())))
             {
                 float wheelSteps = Mathf.Clamp(scroll, -120f, 120f) / 120f;
                 targetZoom = Mathf.Clamp(

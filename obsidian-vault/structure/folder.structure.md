@@ -48,6 +48,8 @@ Party combat stats now include validated attack speed, materialized on the four 
 
 `Abilities/` now contains configurable boss definitions, per-boss cast/readiness execution, immutable clipped ground polygons, encounter-local pending hazards and independent mesh presentation. `Encounters/ArenaBoundary` supplies the explicit playable volume. The existing boss/party producers submit navigation and combat requests for mobile targeting and reactions. `BossEncounterSceneSetup` wires the current arena, and `BossNavigationSetup` maintains the separate boss-size profile and `Scenes/RaidBossNavMesh.asset` without replacing the party bake. `Data/BaseGame/Abilities/WallOfFlames.asset` is the sole production ability. `BossEncounterVerification` covers focused runtime fixtures, production timing and original-bar combat regression. See [boss abilities and hazards](../systems/boss-abilities-and-hazards.md).
 
+`UI/CombatHud` owns the screen-space party frames, live log, inert mock panels and Editor-only debug presentation. `UI/UiPointerBlocker` supplies current UI-hit checks to selection, movement input and camera zoom. `Input/CombatHudControls.asset` holds the V world-bar visibility action. `CombatHudSceneSetup` attaches the saved HUD, event system and binding without rerunning balance setup. See [combat HUD](../systems/combat-hud.md).
+
 ## World conventions
 
 - This is a fully 3D Unity project. XZ is the horizontal gameplay plane; Y is elevation.

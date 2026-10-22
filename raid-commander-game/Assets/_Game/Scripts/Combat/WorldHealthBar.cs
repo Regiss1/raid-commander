@@ -8,9 +8,12 @@ namespace RaidCommander.Combat
     [DefaultExecutionOrder(100)]
     public sealed class WorldHealthBar : MonoBehaviour
     {
+        private const float ReferencePixelHeight = 720f;
+
         [SerializeField] private Transform followTarget;
         [SerializeField] private Camera viewCamera;
         [SerializeField] private Vector3 worldOffset = new Vector3(0f, 1.8f, 0f);
+        [Tooltip("Projected bar height in pixels at a 720-pixel-tall camera view.")]
         [SerializeField, Min(1f)] private float screenHeight = 10f;
         private RectTransform rect;
 
@@ -29,7 +32,9 @@ namespace RaidCommander.Combat
                 ? 2f * viewCamera.orthographicSize
                 : 2f * Mathf.Abs(Vector3.Dot(transform.position - viewCamera.transform.position,
                     viewCamera.transform.forward)) * Mathf.Tan(viewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f);
-            float scale = viewHeight / viewCamera.pixelHeight * screenHeight / Mathf.Max(1f, rect.rect.height);
+            float targetPixelHeight = screenHeight * viewCamera.pixelHeight / ReferencePixelHeight;
+            float scale = viewHeight / viewCamera.pixelHeight * targetPixelHeight
+                / Mathf.Max(1f, rect.rect.height);
             Vector3 parentScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
             transform.localScale = new Vector3(scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.x)),
                 scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.y)),

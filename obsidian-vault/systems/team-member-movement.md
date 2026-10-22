@@ -1,4 +1,4 @@
-# Team member movement v1.4
+# Team member movement v1.5
 
 **Status:** implemented
 
@@ -15,6 +15,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - A new valid manual command replaces an active move, reporting the previous command as Interrupted.
 - A temporary green ring shows the accepted destination. A red ring indicates an invalid ground target or an obstacle click. Both rings lie on XZ at the destination's elevation and disappear after 1.25 seconds. Misses and clicks with no selection issue no command.
 - Invalid, disconnected, and partial-path destinations are rejected before changing the active order. Walls and other solid arena obstacles still block ground targeting.
+- Right-clicking a visible screen-HUD panel issues no move or destination marker; open arena regions keep normal ground orders.
 
 ## Implementation
 
@@ -22,6 +23,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - A separate boss NavMesh profile and saved mesh supply clearance for its larger body while preserving the party mesh. Both remain static, passable between units and blocked by solid arena geometry. **Configure Movement and Bake Navigation** rebakes both current surfaces; see [boss abilities and hazards](boss-abilities-and-hazards.md).
 
 - `PlayerMovementInput` uses the Input System right-button action and the central selection controller. Its raycast excludes FriendlyUnit and HostileUnit, checks the first remaining collider against the Ground mask, submits a manual command, and updates `DestinationMarker`.
+- `UiPointerBlocker` checks current uGUI raycast hits before movement targeting, so HUD clicks cannot produce world orders even if component Update order changes.
 - `UnitMovement.TryMove(Vector3, MovementSource)` is the shared execution API. It accepts Manual or Autonomous sources without depending on selection, input devices, or role decisions.
 - Destinations must be finite and sample onto the matching NavMesh within 0.5 world units. Only a complete `NavMeshAgent.CalculatePath` is accepted; `SetPath` executes that validated route. See [Unity's CalculatePath reference](https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/ai/navmeshagent/calculatepath).
 - `MoveResult` reports Accepted, ManualOverrideActive, AgentUnavailable, InvalidDestination, or Unreachable. Rejections do not acquire manual ownership or cancel an existing valid order. An agent failure while applying a path ends an active command as Failed.
@@ -39,6 +41,7 @@ Each party member owns an independent NavMeshAgent and movement executor. Player
 - `raid-commander-game/Assets/_Game/Scripts/Movement/UnitMovement.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Movement/PlayerMovementInput.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Movement/DestinationMarker.cs`
+- `raid-commander-game/Assets/_Game/Scripts/UI/UiPointerBlocker.cs`
 - `raid-commander-game/Assets/_Game/Editor/ArenaMovementSetup.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/MovementVerification.cs`
 - `raid-commander-game/Assets/_Game/Editor/RangedDpsSceneSetup.cs`
@@ -67,6 +70,7 @@ Verified v1.1 on 2026-10-18 in Unity 6000.6.6f1: the automated Play-mode checks 
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.5 | 2026-10-21 | Blocked right-click movement and marker production over visible combat HUD panels. |
 | v1.4 | 2026-10-21 | Reused the executor for boss movement and party hazard/chase reactions; corrected scaled feet offsets and added separate boss-clearance baking while preserving party navigation and manual terminal states. |
 | v1.3 | 2026-10-20 | Integrated independent role positioning through the existing Autonomous source; verified combat during manual movement, selection independence, ownership release and autonomous resume in T7's Play-mode suite. |
 | v1.2 | 2026-10-20 | Extended setup and regression checks to four party members; verified Ranged DPS movement and preserved customized arena geometry. |

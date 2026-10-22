@@ -16,6 +16,7 @@ namespace RaidCommander.Combat
 
         public IReadOnlyList<CombatLogEntry> History => historyView;
         public event Action<CombatLogEntry> EntryRecorded;
+        public event Action SessionReset;
 
         private void Awake()
         {
@@ -43,6 +44,7 @@ namespace RaidCommander.Combat
             history.Clear();
             nextSequence = 1;
             sessionStart = Time.realtimeSinceStartupAsDouble;
+            SessionReset?.Invoke();
         }
 
         private void OnValidate() => historyLimit = Mathf.Max(1, historyLimit);

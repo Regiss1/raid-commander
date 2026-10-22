@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39fa3d8997a24136984ca6e2c99902bc, type: 3}
+  m_Name: CombatHudControls
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionAsset
+  m_ActionMaps:
+  - m_Name: Combat HUD
+    m_Id: 
+    m_Asset: {fileID: 11400000}
+    m_Actions:
+    - m_Name: Toggle Party World Health Bars
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: 8c83ba56-1a7b-491b-8822-5b31b7cce631
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    m_Bindings:
+    - m_Name: 
+      m_Id: 8b5db713-8861-44b1-929c-b793b20f513e
+      m_Path: <Keyboard>/v
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Party World Health Bars
+      m_Flags: 0
+  m_ControlSchemes: []
+  m_IsProjectWide: 0

@@ -39,6 +39,13 @@ namespace RaidCommander.UI
             Refresh(unit);
         }
 
+        public void ConfigurePresentation(UnityEngine.UI.Image fillImage, TMP_Text values)
+        {
+            fill = fillImage;
+            healthValueLabel = values;
+            Refresh(unit);
+        }
+
         private void Subscribe()
         {
             if (unit == null || subscribedUnit == unit) return;

@@ -13,6 +13,8 @@ This vault holds project context, design notes, architecture planning, and devel
 - [Boss abilities and hazards](systems/boss-abilities-and-hazards.md) documents mobile boss targeting, Wall of Flames, clipped telegraphs, per-instance loadouts and the separate boss navigation bake.
 - [Combat and event logging](systems/combat-and-logging.md) documents melee/ranged damage, the fourth cyan party unit, debug actions, health changes and encounter-scoped combat events.
 - [Reactive health bars](systems/health-bars.md) documents party health displays and the boss HUD.
+- [Combat HUD](systems/combat-hud.md) documents selectable party frames, the live log, Editor debug swap, mocks, responsive layout and world-bar visibility.
+- [Camera controls](systems/camera-controls.md) documents orthographic pan and zoom, including HUD wheel isolation.
 - `prompts/tasks/` contains task prompts and implementation planning.
 - [Task implementation workflow](structure/task-workflow.md) defines task identity, revision planning, GitHub issue status, local review, and approval before commit, push, and completion.
 - `AGENTS.md` records practices for maintaining this vault.

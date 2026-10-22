@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using RaidCommander.UI;
 
 namespace RaidCommander.Selection
 {
@@ -95,6 +96,8 @@ namespace RaidCommander.Selection
 
         private void SelectAtPointer()
         {
+            if (Mouse.current != null && UiPointerBlocker.Contains(Mouse.current.position.ReadValue()))
+                return;
             if (selectionCamera == null || Mouse.current == null)
             {
                 Select(null);

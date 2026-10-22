@@ -1,6 +1,6 @@
 using RaidCommander.Selection;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using RaidCommander.UI;
 using UnityEngine.InputSystem;
 
 namespace RaidCommander.Movement
@@ -33,7 +33,7 @@ namespace RaidCommander.Movement
         public bool TryMoveAtScreenPosition(Vector2 screenPosition)
         {
             if (worldCamera == null || selection == null || selection.SelectedUnit == null
-                || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()))
+                || UiPointerBlocker.Contains(screenPosition))
                 return false;
             if (!selection.SelectedUnit.TryGetComponent(out UnitMovement movement))
                 return false;

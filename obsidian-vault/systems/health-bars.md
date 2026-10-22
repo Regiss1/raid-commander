@@ -1,4 +1,4 @@
-# Reactive health bars v1.4
+# Reactive health bars v1.6
 
 **Status:** implemented
 
@@ -8,7 +8,8 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 
 ## Behavior
 
-- Party members have independent world-space bars above their models. A configurable world offset follows movement, the bars face the camera, and projection compensation keeps them readable during zoom.
+- Party members have independent world-space bars above their models. A configurable world offset follows movement, the bars face the camera, and projection compensation keeps them readable during zoom and at higher display resolutions.
+- The combat HUD adds four screen-space health frames driven by the same `HealthBarBinding`. V toggles only world-space party bars; re-enabling them refreshes from current health.
 - Party bars have a thin dark outline in their role color: blue for Tank, green for Healer, orange for Melee DPS, and cyan for Ranged DPS. The outline surrounds the complete bar, including its missing-health region.
 - One boss HUD stays at the top center of the screen. The percentage appears on the left, current / maximum health on the right, and `Boss` below the bar.
 - Percentages use whole numbers. Health values use whole numbers with comma thousands separators, such as `7,500 / 10,000`.
@@ -19,7 +20,8 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 
 - `CombatUnit.HealthChanged` remains the shared notification. `CombatUnit` no longer holds UI references. ScriptableObject stats provide initial maximum health; `SetMaximumHealth` owns runtime cap changes, preserves current health and clamps it to the new cap, and publishes after applying the change. Changing the cap does not heal or revive a defeated unit. A zero cap is supported safely.
 - `HealthBarBinding` subscribes once to its unit, initializes from current state, updates the fill and optional TMP labels, and releases its subscription on disable/destruction or rebinding. It does not poll health in `Update` or `LateUpdate`.
-- `WorldHealthBar` handles world offset, camera facing and projected size only. `ScreenBossHealthBar` handles HUD layout and name only. Neither presentation calculates combat outcomes.
+- `ConfigurePresentation` supplies the fill and values label for HUD frames built at runtime; `Bind` remains the health-source switch. See [Combat HUD](combat-hud.md) for frame layout and input.
+- `WorldHealthBar` handles world offset, camera facing and projected size only. Its `screenHeight` is the target pixel height for a 720-pixel-tall camera view; the target scales with camera viewport height while the world scale also compensates for orthographic zoom. All four saved party bars use `screenHeight = 10`. `ScreenBossHealthBar` handles HUD layout and name only. Neither presentation calculates combat outcomes.
 - Party backgrounds use a uGUI `Outline` configured from the existing `SelectableUnit.Role` by the scene setup. The 1.4 Canvas-unit outline projects to approximately one screen pixel with the existing zoom compensation; the fill remains green.
 - Filled uGUI Images use a shared solid rectangular sprite with no transparent edges, and fills reach the bar edges without an inset. Full health has no black side strips; the dark background becomes visible as health is lost. A sprite is required so `fillAmount` changes rendered geometry; a sprite-less Filled Image would otherwise draw a full quad.
 - `HealthBarSceneAssets` creates the shared font/material and converts existing boss text in place. TMP Essential Resources stay in `Assets/TextMesh Pro/`; first-party assets stay under `Assets/_Game/Art/UI/HealthBars/`.
@@ -32,6 +34,7 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 - `raid-commander-game/Assets/_Game/Scripts/UI/HealthBarBinding.cs`
 - `raid-commander-game/Assets/_Game/Scripts/UI/ScreenBossHealthBar.cs`
 - `raid-commander-game/Assets/_Game/Scripts/UI/HealthBarTextOutline.cs`
+- `raid-commander-game/Assets/_Game/Scripts/UI/CombatHud.cs`
 - `raid-commander-game/Assets/_Game/Editor/CombatSceneSetup.cs`
 - `raid-commander-game/Assets/_Game/Editor/HealthBarSceneAssets.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/ReactiveHealthBarVerification.cs`
@@ -42,7 +45,9 @@ Party bars and the boss HUD share one event-driven view of `CombatUnit` health. 
 
 ## Current scope
 
-Supports four party bars and one active boss HUD. Party bars have no text. Floating numbers, resource bars, shields, animations and multiple boss HUDs remain outside this task.
+Supports four world-space party bars, four screen-space party frames, and one active boss HUD. World bars have no text. Floating numbers, resource bars, shields, animations and multiple boss HUDs remain outside this task.
+
+T9 review correction: the four saved world-bar sizes were normalized from 5 to 10 at the 720p reference height; an unsaved Tank value of 100 was a test parameter and was discarded. Play-mode measurements showed projected heights of approximately 9–11 pixels at 1280x720, 14–17 at 1920x1080, and 19–22 at 2560x1440 and 3440x1440. Full-size Game views were inspected at 720p, 1440p and ultrawide, and all four bars still hide and show together.
 
 T6 reuses `HealthBarBinding` and `WorldHealthBar` for the fourth unit. Play-mode checks passed for ranged damage on the boss HUD and damage, healing, death, reset and movement on the Ranged DPS bar. The existing five-resolution HUD suite passed, and the four-unit Game view was inspected at orthographic sizes 8, 20 and 30. Boss text retains the two-pixel outline convention.
 
@@ -60,6 +65,8 @@ The v1.3 role outlines were visually checked in Play Mode on all three party bar
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.6 | 2026-10-22 | Scaled projected world-bar height with viewport height and set all four saved party bars to the 10-pixel 720p reference size. |
+| v1.5 | 2026-10-21 | Reused the reactive binding for party frames and added current-session visibility of the four world bars. |
 | v1.4 | 2026-10-20 | Added the fourth reactive party bar with a cyan role outline; verified ranged damage, healing/death/reset and camera integration. |
 | v1.3 | 2026-10-20 | Added thin dark blue, green and orange party bar outlines using the existing party roles. |
 | v1.2 | 2026-10-20 | Replaced rounded button fills with a solid rectangular sprite and removed insets that exposed dark bar borders. |
