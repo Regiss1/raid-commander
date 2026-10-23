@@ -1,4 +1,4 @@
-# Boss abilities and ground hazards v1.2
+# Boss abilities and ground hazards v1.3
 
 **Status:** implemented; T8 requester-approved on 2026-10-21, including startup validation and mutual-spacing corrections. See the linked task issue for publication/completion state.
 
@@ -13,6 +13,7 @@ The arena's boss produces movement and melee requests independently of party sel
 - Wall of Flames first starts 90 seconds after Play activation/reset and subsequent starts are 90 seconds apart. It aims uniformly at an eligible living unit across all four roles, with unlimited targeting distance. Its four-unit-wide yellow footprint extends from the boss's front to the explicit playable boundary, clipped at oblique corners. Internal obstacles do not stop flames.
 - The boss stops and locks facing/origin for three seconds. At completion the footprint turns red for 0.35 seconds, and living party ground centers inside/on it take one 95-point hit, capped by remaining health. Late entrants take no damage. Moving or losing the aimed-at unit does not move/cancel a ground cast. Combat targeting remains independent of cast aim: retain a valid pre-cast combat target through completion unless Tank acquisition or target invalidation supersedes it, then resume normal closest-target decisions.
 - Movement priority is death/inactive boss, manual order, pending-hazard escape, non-Tank retreat toward a living Tank when actively chased, then normal role positioning. Escape seeks the shortest reachable safe exit with agent clearance and avoids unsafe endpoints in overlapping hazards. No reachable exit reports `NoSafeExit` and retries. Normal autonomous paths cannot reenter/cross a pending footprint. Manual orders may enter danger and valid attacks/heals continue during every positioning reaction.
+- With T10, party members check Awareness before committing to escape while inside a pending footprint. A failed check leaves normal role behavior active; existing preventive path avoidance still applies. Boss abilities do not perform Awareness checks. Simultaneous pending footprints form one exposure for each party member while safe-exit search still considers all footprints.
 - The existing debug panel shows combat target, boss movement/casting, countdown, party reaction states and spell IDs in event history. Boss protection, immediate debug actions, F8 and the health/log reset remain available. No results screen or new restart flow is added.
 
 ## Implementation
@@ -22,6 +23,7 @@ The arena's boss produces movement and melee requests independently of party sel
 - The runner captures activation time in `OnEnable`, then first validates in `Start` after scene peers finish their initialization. Subsequent validation runs at the existing 0.1-second decision cadence while idle. Missing boundary/hazard references, disabled or invalid boundary geometry, and invalid ability dimensions have distinct diagnostics; each unchanged error is logged once per readiness entry. Repair clears the error and restores readiness without replacing its interval/cooldown/threshold state. Reset/reactivation creates fresh encounter state with the authored initial delay. Initial uninitialized/dead health cannot queue a threshold cast.
 - `ArenaBoundary` references an explicit horizontal BoxCollider volume. Bounds derive from its authored center/size and transform rather than physics registration, and validity requires enabled/active components and positive finite XZ bounds. The saved volume spans the perimeter walls' inner faces, XZ -16.5 to 16.5. It is a trigger on Ignore Raycast and is excluded from navigation baking. It is editable independently of wall names or camera bounds; repeated setup preserves it.
 - `HazardFootprint` clips a convex rectangle to that boundary. The same polygon drives renderer vertices, closed-edge hit tests, clearance, and path intersection. `GroundHazards` contains pending footprints only; impact visuals are presentation-only. Victims are snapshotted once and deduplicated by unit, independent of colliders.
+- T10 registration attaches an immutable display/cast identity to each pending footprint. `GroundHazards.ContainingIdentities` snapshots all footprints containing a member's XZ ground center for the decision recorder. A local increasing cast ID distinguishes simultaneous casts even when the spell name and ability ID match; geometry and damage still use the original footprint owner.
 - `CombatSystem.PublishCast` activates the existing cast event schema, and optional spell IDs propagate through spell damage and lethal death events. Ordinary and protected-boss damage semantics remain unchanged. Disable/death cancels without damage; reset cancels without adding a failure entry after the encounter log has been cleared.
 - `BossEncounterSceneSetup` wires the current arena without regeneration. `BossNavigationSetup` creates a separate Raid Boss profile (0.95 world-unit bake clearance, height 3) and saved `RaidBossNavMesh.asset`; the four party agents and their original mesh remain unchanged. Both bakes collect Default/Ground physics geometry and ignore both unit layers. Boss automatic avoidance stays disabled and units remain mutually passable. The scaled boss's agent base offset and movement feet calculation account for transform scale.
 - **Configure Boss Encounter and Wall of Flames** (also **Configure Autonomous Party AI**) reapplies scene wiring and preserves existing loadout, ability values, component identity, balance assets and authored boundary. **Configure Movement and Bake Navigation** rebakes both existing surfaces after geometry changes, preserving their asset GUIDs. The full arena-generation/combat paths also include the feature.
@@ -46,12 +48,15 @@ The arena's boss produces movement and melee requests independently of party sel
 - `raid-commander-game/Assets/_Game/Editor/PartyAiSceneSetup.cs`
 - `raid-commander-game/Assets/_Game/Editor/ArenaMovementSetup.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/BossEncounterVerification.cs`
+- `raid-commander-game/Assets/_Game/Tests/Editor/AwarenessVerification.cs`
 - `raid-commander-game/Assets/_Game/Data/BaseGame/Abilities/WallOfFlames.asset`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArena.unity`
 - `raid-commander-game/Assets/_Game/Scenes/RaidBossNavMesh.asset`
 - `raid-commander-game/ProjectSettings/NavMeshAreas.asset`
 
 ## Current scope
+
+The current saved `WallOfFlames.asset` has requester-authored 5-second initial delay, 15-second interval and 2-second cast time; earlier T8 acceptance paragraphs below record the original 90/90/3 timing fixtures. T10 preserves the asset's authored values. Only pending geometry participates in Awareness; the red impact visual does not.
 
 One production boss ability, rectangular ground damage, minimal direct-target and health-threshold support, static baked arena navigation and four party reactions. The finite edge samples cannot guarantee an exit in every arbitrary obstacle arrangement; failures remain explicit and retry at bounded frequency. Boundary authoring currently uses a horizontal axis-aligned box. Casts use game time; party offensive rates remain stat-derived and healing retains its separate interval.
 
@@ -67,6 +72,7 @@ These verification paragraphs record the pre-approval review checkpoints. The re
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.3 | 2026-10-22 | Added per-registration pending-cast identity snapshots for T10 Awareness decisions, preserving hazard geometry, cast resolution and authored ability tuning. |
 | v1.2 | 2026-10-21 | Replaced the narrow outer melee band with target-aware close retreat and distinct release distance, allowing stable mutual Tank/boss combat; clear retreat state when targets change. |
 | v1.1 | 2026-10-21 | Corrected early Play-entry validation and permanently cached invalid readiness; derive boundary geometry independently of physics startup, recover setup without resetting clocks, and report precise deduplicated errors. |
 | v1.0 | 2026-10-21 | Added mobile boss targeting and spacing, per-instance configurable abilities, clipped Wall of Flames, shared pending hazards, party reactions and boss-size navigation; verified under T8. |

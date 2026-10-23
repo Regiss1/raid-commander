@@ -822,6 +822,7 @@ MonoBehaviour:
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
   fallbackAttackSpeed: 1
+  fallbackAwareness: 5
 --- !u!114 &338086626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -844,6 +845,7 @@ MonoBehaviour:
   - {fileID: 1568423918}
   - {fileID: 1035513437}
   hazards: {fileID: 1003551809}
+  decisionLog: {fileID: 1443734134}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -1192,6 +1194,7 @@ MonoBehaviour:
   fallbackMeleeRange: 3.5
   fallbackRangedRange: 4
   fallbackAttackSpeed: 1
+  fallbackAwareness: 5
 --- !u!114 &419772315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1934,6 +1937,7 @@ MonoBehaviour:
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 18
   fallbackAttackSpeed: 1
+  fallbackAwareness: 5
 --- !u!114 &615512143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1956,6 +1960,7 @@ MonoBehaviour:
   - {fileID: 1568423918}
   - {fileID: 1035513437}
   hazards: {fileID: 1003551809}
+  decisionLog: {fileID: 1443734134}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -3000,6 +3005,7 @@ MonoBehaviour:
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
   fallbackAttackSpeed: 1
+  fallbackAwareness: 5
 --- !u!114 &1035513438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3300,6 +3306,7 @@ MonoBehaviour:
   - {fileID: 1568423918}
   - {fileID: 1035513437}
   hazards: {fileID: 1003551809}
+  decisionLog: {fileID: 1443734134}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8
@@ -3651,6 +3658,7 @@ MonoBehaviour:
   - {fileID: 1035513437}
   boss: {fileID: 419772314}
   log: {fileID: 1443734132}
+  decisions: {fileID: 1443734134}
   actions: {fileID: 1786974365}
   controls: {fileID: 11400000, guid: 967b1e5f9d6767a4bbf4c284b6209669, type: 2}
 --- !u!224 &1165759187
@@ -4316,6 +4324,7 @@ GameObject:
   - component: {fileID: 1443734133}
   - component: {fileID: 1443734132}
   - component: {fileID: 1443734131}
+  - component: {fileID: 1443734134}
   m_Layer: 0
   m_Name: Combat Services
   m_TagString: Untagged
@@ -4366,6 +4375,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1443734134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443734130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2a9edde254b76442b9f5b61a98c0693, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RaidCommander.Units.DecisionLogService
+  combat: {fileID: 1443734131}
+  combatLog: {fileID: 1443734132}
+  historyLimit: 1000
 --- !u!1 &1491753942
 GameObject:
   m_ObjectHideFlags: 0
@@ -4837,6 +4861,7 @@ MonoBehaviour:
   fallbackMeleeRange: 2.5
   fallbackRangedRange: 4
   fallbackAttackSpeed: 1
+  fallbackAwareness: 5
 --- !u!114 &1568423919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4859,6 +4884,7 @@ MonoBehaviour:
   - {fileID: 1568423918}
   - {fileID: 1035513437}
   hazards: {fileID: 1003551809}
+  decisionLog: {fileID: 1443734134}
   decisionInterval: 0.2
   actionInterval: 1.5
   positionSearchInterval: 0.8

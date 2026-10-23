@@ -20,6 +20,7 @@ namespace RaidCommander.UI
         [SerializeField] private CombatUnit[] party = new CombatUnit[4];
         [SerializeField] private CombatUnit boss;
         [SerializeField] private CombatLogService log;
+        [SerializeField] private DecisionLogService decisions;
         [SerializeField] private CombatDebugActions actions;
         [SerializeField] private InputActionAsset controls;
 
@@ -33,6 +34,13 @@ namespace RaidCommander.UI
         private GameObject normalView;
         private ScrollRect normalScroll;
         private TMP_Text normalText;
+        private ScrollRect decisionScroll;
+        private TMP_Text decisionText;
+        private TMP_Text combatTabText, decisionTabText;
+        private bool selectedDecisions;
+        private bool followDecisions = true;
+        private bool pendingDecisionFollow;
+        private long firstCombatSequence, firstDecisionSequence;
         private InputAction visibilityAction;
         private bool worldBarsVisible = true;
         private bool followLog = true;
@@ -84,25 +92,29 @@ namespace RaidCommander.UI
         {
             if (selection != null) selection.SelectionChanged += OnSelectionChanged;
             if (log != null) { log.EntryRecorded += OnEntry; log.SessionReset += OnLogReset; }
+            if (decisions != null) { decisions.EntryRecorded += OnDecision; decisions.SessionReset += OnDecisionReset; }
             for (int i = 0; i < frames.Length; i++)
                 if (frames[i] != null && frames[i].Unit != null)
                     frames[i].Unit.HealthChanged += OnHealthChanged;
             visibilityAction?.Enable();
             OnSelectionChanged(selection != null ? selection.SelectedUnit : null);
             RefreshAllHealth();
-            RebuildLog(true);
+            RebuildLog(false);
+            RebuildDecisions(false);
         }
 
         private void Start()
         {
             RefreshAllHealth();
-            RebuildLog(true);
+            RebuildLog(false);
+            RebuildDecisions(false);
         }
 
         private void OnDisable()
         {
             if (selection != null) selection.SelectionChanged -= OnSelectionChanged;
             if (log != null) { log.EntryRecorded -= OnEntry; log.SessionReset -= OnLogReset; }
+            if (decisions != null) { decisions.EntryRecorded -= OnDecision; decisions.SessionReset -= OnDecisionReset; }
             foreach (Frame frame in frames)
                 if (frame != null && frame.Unit != null) frame.Unit.HealthChanged -= OnHealthChanged;
             visibilityAction?.Disable();
@@ -124,11 +136,19 @@ namespace RaidCommander.UI
 
         private void LateUpdate()
         {
-            if (pendingFollow && normalScroll != null)
+            if (!followLog) pendingFollow = false;
+            if (!followDecisions) pendingDecisionFollow = false;
+            if (pendingFollow && normalScroll != null && normalScroll.gameObject.activeInHierarchy)
             {
                 Canvas.ForceUpdateCanvases();
                 normalScroll.verticalNormalizedPosition = 0f;
                 pendingFollow = false;
+            }
+            if (pendingDecisionFollow && decisionScroll != null && decisionScroll.gameObject.activeInHierarchy)
+            {
+                Canvas.ForceUpdateCanvases();
+                decisionScroll.verticalNormalizedPosition = 0f;
+                pendingDecisionFollow = false;
             }
         }
 
@@ -258,13 +278,23 @@ namespace RaidCommander.UI
         {
             normalView = Panel("Combat Log", transform, new Vector2(.005f, .035f),
                 new Vector2(.235f, .755f), new Color(.055f, .085f, .12f, .91f)).gameObject;
-            Text("Combat Log", normalView.transform, 25, FontStyles.Bold,
-                TextAlignmentOptions.Left, new Vector2(.04f, .93f), new Vector2(.96f, .99f));
+            Text("Encounter Log", normalView.transform, 23, FontStyles.Bold,
+                TextAlignmentOptions.Left, new Vector2(.04f, .945f), new Vector2(.96f, .995f));
+            var combatTab = Panel("Combat Tab", normalView.transform, new Vector2(.035f, .885f),
+                new Vector2(.49f, .94f), new Color(.16f, .29f, .41f));
+            var decisionTab = Panel("Decisions Tab", normalView.transform, new Vector2(.51f, .885f),
+                new Vector2(.965f, .94f), new Color(.12f, .18f, .24f));
+            combatTab.gameObject.AddComponent<Button>().onClick.AddListener(() => SetTab(false));
+            decisionTab.gameObject.AddComponent<Button>().onClick.AddListener(() => SetTab(true));
+            combatTabText = Text("Combat", combatTab.transform, 21, FontStyles.Bold,
+                TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
+            decisionTabText = Text("Decisions", decisionTab.transform, 21, FontStyles.Bold,
+                TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
             normalScroll = CreateScroll(normalView.transform, new Vector2(.035f, .025f),
-                new Vector2(.965f, .925f), out RectTransform content);
+                new Vector2(.965f, .88f), out RectTransform content);
             normalScroll.onValueChanged.AddListener(_ =>
             {
-                if (normalView == null || !normalView.activeInHierarchy || Mouse.current == null) return;
+                if (normalScroll == null || !normalScroll.gameObject.activeInHierarchy || Mouse.current == null) return;
                 Vector2 pointer = Mouse.current.position.ReadValue();
                 if (!RectTransformUtility.RectangleContainsScreenPoint(normalScroll.viewport, pointer)) return;
                 bool wheel = Mathf.Abs(Mouse.current.scroll.ReadValue().y) > .01f;
@@ -279,10 +309,57 @@ namespace RaidCommander.UI
             var fitter = normalText.gameObject.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             normalScroll.content = normalText.rectTransform;
+
+            decisionScroll = CreateScroll(normalView.transform, new Vector2(.035f, .025f),
+                new Vector2(.965f, .88f), out RectTransform decisionContent);
+            decisionScroll.gameObject.name = "Decisions Scroll";
+            decisionScroll.onValueChanged.AddListener(_ =>
+            {
+                if (!decisionScroll.gameObject.activeInHierarchy || Mouse.current == null) return;
+                Vector2 pointer = Mouse.current.position.ReadValue();
+                if (!RectTransformUtility.RectangleContainsScreenPoint(decisionScroll.viewport, pointer)) return;
+                bool wheel = Mathf.Abs(Mouse.current.scroll.ReadValue().y) > .01f;
+                bool drag = Mouse.current.leftButton.isPressed;
+                if (wheel || drag) followDecisions = decisionScroll.verticalNormalizedPosition <= .02f;
+            });
+            decisionText = Text("", decisionContent, 21, FontStyles.Normal, TextAlignmentOptions.TopLeft,
+                new Vector2(0f, 1f), Vector2.one);
+            decisionText.textWrappingMode = TextWrappingModes.Normal;
+            decisionText.overflowMode = TextOverflowModes.Overflow;
+            decisionText.rectTransform.pivot = new Vector2(.5f, 1f);
+            decisionText.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            decisionScroll.content = decisionText.rectTransform;
+            SetTab(false);
+        }
+
+        public bool DecisionsSelected => selectedDecisions;
+        private void SetTab(bool showDecisions)
+        {
+            selectedDecisions = showDecisions;
+            normalScroll.gameObject.SetActive(!showDecisions);
+            decisionScroll.gameObject.SetActive(showDecisions);
+            combatTabText.text = showDecisions ? "Combat" : "> Combat";
+            decisionTabText.text = showDecisions ? "> Decisions" : "Decisions";
+            combatTabText.transform.parent.GetComponent<UnityEngine.UI.Image>().color = showDecisions
+                ? new Color(.12f, .18f, .24f) : new Color(.16f, .29f, .41f);
+            decisionTabText.transform.parent.GetComponent<UnityEngine.UI.Image>().color = showDecisions
+                ? new Color(.16f, .29f, .41f) : new Color(.12f, .18f, .24f);
+            if (showDecisions)
+            {
+                RebuildDecisions(false);
+                if (followDecisions) pendingDecisionFollow = true;
+            }
+            else
+            {
+                RebuildLog(false);
+                if (followLog) pendingFollow = true;
+            }
         }
 
         private void OnEntry(CombatLogEntry entry) => RebuildLog(false);
         private void OnLogReset() => RebuildLog(true);
+        private void OnDecision(DecisionLogEntry entry) => RebuildDecisions(false);
+        private void OnDecisionReset() => RebuildDecisions(true);
 
         private void RebuildLog(bool reset)
         {
@@ -290,7 +367,8 @@ namespace RaidCommander.UI
             bool follow = reset || followLog;
             if (reset) followLog = true;
             float oldY = normalScroll.content.anchoredPosition.y;
-            int oldCount = normalText.textInfo.lineCount;
+            long newFirst = log.History.Count > 0 ? log.History[0].Sequence : 0;
+            float removedHeight = EvictedHeight(normalText, firstCombatSequence, newFirst);
             builder.Clear();
             foreach (CombatLogEntry entry in log.History)
             {
@@ -302,15 +380,11 @@ namespace RaidCommander.UI
                 if (entry.Healing.HasValue) builder.Append("  +").Append(entry.Healing.Value);
                 builder.Append('\n');
             }
-            normalText.text = builder.ToString();
+            normalText.text = builder.Length == 0 ? "No combat events yet." : builder.ToString();
+            firstCombatSequence = newFirst;
             Canvas.ForceUpdateCanvases();
             if (follow) pendingFollow = true;
-            else
-            {
-                float removedHeight = normalText.textInfo.lineCount < oldCount
-                    ? (oldCount - normalText.textInfo.lineCount) * normalText.fontSize * 1.2f : 0f;
-                normalScroll.content.anchoredPosition = new Vector2(0f, Mathf.Max(0f, oldY - removedHeight));
-            }
+            else normalScroll.content.anchoredPosition = new Vector2(0f, Mathf.Max(0f, oldY - removedHeight));
 #if UNITY_EDITOR
             if (debugHistory != null)
             {
@@ -319,6 +393,58 @@ namespace RaidCommander.UI
                     Mathf.Max(200f, debugHistory.preferredHeight + 8f);
             }
 #endif
+        }
+
+        private void RebuildDecisions(bool reset)
+        {
+            if (decisionText == null) return;
+            if (reset) followDecisions = true;
+            bool follow = followDecisions;
+            float oldY = decisionScroll.content.anchoredPosition.y;
+            long newFirst = decisions != null && decisions.History != null && decisions.History.Count > 0
+                ? decisions.History[0].Sequence : 0;
+            float removedHeight = EvictedHeight(decisionText, firstDecisionSequence, newFirst);
+            builder.Clear();
+            if (decisions != null && decisions.History != null)
+                foreach (DecisionLogEntry entry in decisions.History)
+                {
+                    builder.Append(FormatTime(entry.Timestamp)).Append(' ').Append(entry.MemberName)
+                        .Append(" | ").Append(entry.Hazards).Append(" | ");
+                    if (entry.Kind == DecisionKind.AwarenessCheck)
+                        builder.Append("Awareness ").Append(entry.Awareness.Value).Append(" | ")
+                            .Append(entry.Awareness.Value * 10).Append("% | roll ")
+                            .Append(entry.Roll.Value).Append("/10 | ")
+                            .Append(entry.Success == true ? "Detected" : "Failed");
+                    else if (entry.Kind == DecisionKind.EscapeStarted) builder.Append("Escape started");
+                    else if (entry.Kind == DecisionKind.NoSafeExit) builder.Append("No safe exit");
+                    else builder.Append("Manual order suppressed awareness/escape");
+                    builder.Append('\n');
+                }
+            decisionText.text = builder.Length == 0 ? "No Awareness decisions yet." : builder.ToString();
+            firstDecisionSequence = newFirst;
+            Canvas.ForceUpdateCanvases();
+            if (follow) pendingDecisionFollow = true;
+            else decisionScroll.content.anchoredPosition = new Vector2(0f, Mathf.Max(0f, oldY - removedHeight));
+        }
+
+        private static string FormatTime(double seconds)
+            => TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss\.f", CultureInfo.InvariantCulture);
+
+        private static float EvictedHeight(TMP_Text text, long oldFirst, long newFirst)
+        {
+            if (oldFirst <= 0 || newFirst <= oldFirst) return 0f;
+            string old = text.text;
+            float height = 0f;
+            int start = 0;
+            for (long i = oldFirst; i < newFirst && start < old.Length; i++)
+            {
+                int end = old.IndexOf('\n', start);
+                if (end < 0) break;
+                height += text.GetPreferredValues(old.Substring(start, end - start),
+                    text.rectTransform.rect.width, Mathf.Infinity).y;
+                start = end + 1;
+            }
+            return height;
         }
 
         private string NameFor(int? id)
@@ -396,7 +522,12 @@ namespace RaidCommander.UI
             normalView.SetActive(!debugShown);
             debugView.SetActive(debugShown);
             if (debugShown) RefreshDebug();
-            else RebuildLog(false);
+            else
+            {
+                SetTab(selectedDecisions);
+                RebuildLog(false);
+                RebuildDecisions(false);
+            }
         }
 
         private void RefreshDebug()

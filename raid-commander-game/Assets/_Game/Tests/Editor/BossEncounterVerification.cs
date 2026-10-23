@@ -441,6 +441,8 @@ namespace RaidCommander.Verification
         }
         private static IEnumerator Reactions()
         {
+            // T8's original escape fixtures explicitly model guaranteed detection under T10.
+            foreach (var brain in brains) brain.SetAwarenessRollSourceForVerification(() => 1);
             Reset(false); Warp(boss,new Vector3(0,0,-2));
             for(int i=0;i<party.Length;i++) Warp(party[i],new Vector3(0,0,i*2f));
             var footprint=HazardFootprint.Rectangle(new Vector3(0,0,-1),Vector3.forward,4f,14f,boundary);

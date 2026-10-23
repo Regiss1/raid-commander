@@ -1,3 +1,4 @@
+using System;
 using RaidCommander.Combat;
 using RaidCommander.Abilities;
 using RaidCommander.Movement;
@@ -19,6 +20,7 @@ namespace RaidCommander.Units
         [SerializeField] private CombatUnit tank;
         [SerializeField] private CombatUnit[] party;
         [SerializeField] private GroundHazards hazards;
+        [SerializeField] private DecisionLogService decisionLog;
         [SerializeField, Min(0.05f)] private float decisionInterval = 0.2f;
         // Retain the serialized field for existing scene tuning; offensive timing now comes from stats.
         [SerializeField, Min(0.1f), Tooltip("Basic healing interval. Attacks use CombatUnit.AttackSpeed instead.")]
@@ -33,11 +35,15 @@ namespace RaidCommander.Units
         private BossBasicAttack bossController;
         private BossAbilityRunner bossAbilities;
         private int reactionCommand = -1;
-        private bool escaping;
+        private AwarenessReaction awareness = new AwarenessReaction(() => UnityEngine.Random.Range(1, 11));
+        private bool escapeMoving, escapeBlocked;
+        private string[] committedHazards;
 
         public RoleState State { get; private set; }
         public CombatRole Role => role;
         public CombatUnit Target { get; private set; }
+        public bool EscapeCommitted => awareness.Committed;
+        public void SetAwarenessRollSourceForVerification(Func<int> roll) => awareness = new AwarenessReaction(roll);
 
         private void Awake()
         {
@@ -50,6 +56,7 @@ namespace RaidCommander.Units
         private void OnEnable()
         {
             nextDecision = nextAction = nextPositionSearch = nextActionAttempt = 0f;
+            awareness.Reset(); escapeMoving = escapeBlocked = false; committedHazards = null;
             if (combat != null) combat.SessionReset += ResetDecisions;
         }
 
@@ -57,13 +64,14 @@ namespace RaidCommander.Units
         {
             if (combat != null) combat.SessionReset -= ResetDecisions;
             StopAutonomousMove();
+            awareness.Reset(); escapeMoving = escapeBlocked = false; committedHazards = null;
             Target = null;
             State = RoleState.Idle;
         }
 
         private void ResetDecisions()
         {
-            reactionCommand = -1; escaping = false;
+            reactionCommand = -1; awareness.Reset(); escapeMoving = escapeBlocked = false; committedHazards = null;
             StopAutonomousMove();
             Target = null;
             nextDecision = nextAction = nextPositionSearch = nextActionAttempt = 0f;
@@ -98,10 +106,11 @@ namespace RaidCommander.Units
 
         private void DecidePosition()
         {
-            if (!unit.IsAlive) { StopAutonomousMove(); State = RoleState.Dead; Target = null; return; }
+            if (!unit.IsAlive) { StopAutonomousMove(); awareness.Reset(); escapeMoving = escapeBlocked = false; committedHazards = null; State = RoleState.Dead; Target = null; return; }
             if (combat == null || boss == null || !boss.isActiveAndEnabled || !boss.IsAlive)
             {
-                StopAutonomousMove(); Target = null; unit.SetTarget(null); State = movement.HasManualOverride ? RoleState.ManualMove : RoleState.Idle; return;
+                StopAutonomousMove(); awareness.Reset(); escapeMoving = escapeBlocked = false; committedHazards = null;
+                Target = null; unit.SetTarget(null); State = movement.HasManualOverride ? RoleState.ManualMove : RoleState.Idle; return;
             }
 
             bool healing = role == CombatRole.Healer;
@@ -112,9 +121,30 @@ namespace RaidCommander.Units
             bool clear = combat.HasLineOfSight(transform.position, positionTarget.transform.position);
             bool inRange = distance <= range;
 
-            // Manual movement owns positioning only. TryAct still runs independently each frame.
-            if (movement.HasManualOverride) { State = RoleState.ManualMove; return; }
+            bool centerUnsafe = hazards != null && hazards.IsUnsafe(transform.position);
+            float clearance = agent != null ? agent.radius + 0.15f : 0.8f;
+            bool marginUnsafe = hazards != null && hazards.IsUnsafe(transform.position, clearance);
+            AwarenessResult result = awareness.Evaluate(centerUnsafe, marginUnsafe,
+                movement.HasManualOverride, Time.time, unit.Awareness);
+            if (result.Kind != AwarenessResultKind.None)
+            {
+                string[] identities = hazards != null ? hazards.ContainingIdentities(transform.position) : null;
+                if (result.Kind == AwarenessResultKind.Succeeded) committedHazards = identities;
+                if (result.Kind == AwarenessResultKind.ManualSuppression && (identities == null || identities.Length == 0))
+                    identities = committedHazards;
+                if (result.Kind == AwarenessResultKind.ManualSuppression)
+                    decisionLog?.Record(DecisionKind.ManualSuppression, unit, identities);
+                else decisionLog?.Record(DecisionKind.AwarenessCheck, unit, identities,
+                    result.Awareness, result.Roll, result.Kind == AwarenessResultKind.Succeeded);
+            }
+            if (movement.HasManualOverride)
+            {
+                reactionCommand = -1; escapeMoving = escapeBlocked = false; committedHazards = null;
+                State = RoleState.ManualMove; return;
+            }
+            if (!awareness.Committed) committedHazards = null;
 
+            // Manual movement owns positioning only. TryAct still runs independently each frame.
             if (ReactToEncounter()) return;
 
             float desired = healing || role == CombatRole.RangedDps ? Mathf.Min(preferredDistance, range * 0.8f) : range * 0.75f;
@@ -162,19 +192,20 @@ namespace RaidCommander.Units
         {
             if (hazards != null && hazards.Count > 0 && agent != null && agent.isOnNavMesh
                 && movement.State == MovementState.Moving && movement.Source == MovementSource.Autonomous
-                && !escaping && !hazards.PathIsSafe(agent.path, agent.radius + 0.15f)) StopAutonomousMove();
+                && !awareness.Committed && !hazards.PathIsSafe(agent.path, agent.radius + 0.15f)) StopAutonomousMove();
             float clearance = agent != null ? agent.radius + 0.15f : 0.8f;
-            bool unsafeCenter = hazards != null && hazards.IsUnsafe(transform.position);
-            if (unsafeCenter || (escaping && hazards != null && hazards.IsUnsafe(transform.position, clearance)))
+            if (awareness.Committed)
             {
-                escaping = true;
                 State = RoleState.Escaping;
                 if (Time.time < nextPositionSearch) return true;
                 nextPositionSearch = Time.time + 0.2f;
-                if (!hazards.TryEscape(agent, out Vector3 exit)) { StopAutonomousMove(); State = RoleState.NoSafeExit; return true; }
-                MoveReaction(exit); return true;
+                if (!hazards.TryEscape(agent, out Vector3 exit))
+                {
+                    StopAutonomousMove(); RecordBlocked(); State = RoleState.NoSafeExit; return true;
+                }
+                MoveReaction(exit, true); return true;
             }
-            escaping = false;
+            escapeMoving = escapeBlocked = false;
             if (role != CombatRole.Tank && bossController != null && bossController.isActiveAndEnabled
                 && bossController.CombatTarget == unit && bossController.IsChasing
                 && (bossAbilities == null || !bossAbilities.IsCasting) && tank != null && tank.IsAlive)
@@ -193,17 +224,44 @@ namespace RaidCommander.Units
             }
             StopReaction(); return false;
         }
-        private void MoveReaction(Vector3 destination)
+        private void MoveReaction(Vector3 destination, bool isEscape = false)
         {
             if (movement.State == MovementState.Moving && movement.CommandId == reactionCommand
                 && CombatPositionSearch.PlanarDistance(movement.Destination, destination) < 0.15f) return;
-            if (movement.TryMove(destination, MovementSource.Autonomous) == MoveResult.Accepted) reactionCommand = movement.CommandId;
-            else State = RoleState.NoSafeExit;
+            bool alreadyEscaping = escapeMoving && movement.State == MovementState.Moving
+                && movement.CommandId == reactionCommand && movement.Source == MovementSource.Autonomous;
+            if (movement.TryMove(destination, MovementSource.Autonomous) == MoveResult.Accepted)
+            {
+                reactionCommand = movement.CommandId;
+                if (isEscape)
+                {
+                    if (!alreadyEscaping) RecordOutcome(DecisionKind.EscapeStarted);
+                    escapeMoving = true; escapeBlocked = false;
+                }
+            }
+            else
+            {
+                if (isEscape) RecordBlocked();
+                State = RoleState.NoSafeExit;
+            }
+        }
+        private void RecordBlocked()
+        {
+            escapeMoving = false;
+            if (escapeBlocked) return;
+            escapeBlocked = true;
+            RecordOutcome(DecisionKind.NoSafeExit);
+        }
+        private void RecordOutcome(DecisionKind kind)
+        {
+            string[] identities = hazards != null ? hazards.ContainingIdentities(transform.position) : null;
+            decisionLog?.Record(kind, unit, identities != null && identities.Length > 0 ? identities : committedHazards);
         }
         private void StopReaction()
         {
             if (movement.Source == MovementSource.Autonomous && movement.CommandId == reactionCommand) movement.Cancel();
             reactionCommand = -1;
+            escapeMoving = escapeBlocked = false;
         }
 
         private static bool Injured(CombatUnit candidate) => candidate != null && candidate.IsAlive && candidate.CurrentHealth < candidate.MaximumHealth;

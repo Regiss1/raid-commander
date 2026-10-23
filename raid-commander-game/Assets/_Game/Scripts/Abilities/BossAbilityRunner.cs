@@ -155,7 +155,7 @@ namespace RaidCommander.Abilities
                 CastOrigin = new Vector3(CastOrigin.x, boundary.GroundY, CastOrigin.z);
                 float length = definition.LengthMode == AbilityLength.ToArenaBoundary ? boundary.Bounds.size.magnitude * 2f : definition.Length;
                 PendingFootprint = HazardFootprint.Rectangle(CastOrigin, CastForward, definition.Width, length, boundary);
-                hazards.Register(this, PendingFootprint);
+                hazards.Register(this, PendingFootprint, definition.DisplayName, definition.AbilityId);
                 if (definition.ShowTelegraph && presentation != null) presentation.Show(PendingFootprint, definition.TelegraphColor);
             }
             if (controller != null) controller.CastStarted(definition.StopMovementDuringCast);

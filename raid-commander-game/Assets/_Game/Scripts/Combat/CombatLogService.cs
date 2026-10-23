@@ -15,6 +15,7 @@ namespace RaidCommander.Combat
         private long nextSequence = 1;
 
         public IReadOnlyList<CombatLogEntry> History => historyView;
+        public double SessionElapsed => Time.realtimeSinceStartupAsDouble - sessionStart;
         public event Action<CombatLogEntry> EntryRecorded;
         public event Action SessionReset;
 

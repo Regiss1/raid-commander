@@ -29,6 +29,7 @@
 - [x] Add mobile boss targeting/spacing, configurable per-instance abilities, clipped Wall of Flames and party escape/chase reactions with manual priority; verify runtime timing, damage/logging and existing integrations, including startup validation and stable mutual melee corrections (T8; requester approved).
 - [ ] Add encounter victory/defeat and restart flow.
 - [x] Add reactive selectable party frames, responsive combat HUD, live log/Editor debug swap, inert meter/ability mocks and configurable world-bar visibility ([T9](../prompts/tasks/T9-party-frames-and-responsive-combat-hud.md); requester approved).
+- [x] Add party Awareness checks inside pending telegraphs, committed escape with manual-order priority, and a bounded Decisions tab beside Combat; verify deterministic timing, saved wiring, Play-mode outcomes and supported HUD layouts ([T10](../prompts/tasks/T10-awareness-and-decision-log.md); requester approved).
 - [ ] Playtest for a short, replayable encounter and refine control clarity.
 
 Do not mark an item complete from documentation alone when it describes runtime behavior; verify that behavior exists in the Unity project.

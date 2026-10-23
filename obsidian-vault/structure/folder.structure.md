@@ -50,6 +50,8 @@ Party combat stats now include validated attack speed, materialized on the four 
 
 `UI/CombatHud` owns the screen-space party frames, live log, inert mock panels and Editor-only debug presentation. `UI/UiPointerBlocker` supplies current UI-hit checks to selection, movement input and camera zoom. `Input/CombatHudControls.asset` holds the V world-bar visibility action. `CombatHudSceneSetup` attaches the saved HUD, event system and binding without rerunning balance setup. See [combat HUD](../systems/combat-hud.md).
 
+`Units/AwarenessReaction` keeps the per-member timing and escape commitment used by `PartyRoleBrain`. `CombatStatsDefinition` and `CombatUnit` supply the validated current Awareness value. `Units/DecisionLogService` and `DecisionLogEntry` observe checks and escape outcomes separately from the combat recorder; the HUD presents them in its Decisions tab. `DecisionLogSceneSetup` shares one encounter-local recorder across repeatable party/HUD setup. See [autonomous party AI](../systems/autonomous-party-ai.md) and [combat HUD](../systems/combat-hud.md).
+
 ## World conventions
 
 - This is a fully 3D Unity project. XZ is the horizontal gameplay plane; Y is elevation.

@@ -45,6 +45,7 @@ namespace RaidCommander.EditorTools
             CombatUnit dps, CombatUnit rangedDps, CombatUnit boss)
         {
             CombatUnit[] party = { tank, healer, dps, rangedDps };
+            DecisionLogService decisionLog = DecisionLogSceneSetup.Ensure(scene, combat);
             foreach (CombatUnit unit in party)
             {
                 var unitSettings = new SerializedObject(unit);
@@ -53,6 +54,8 @@ namespace RaidCommander.EditorTools
                 var statsSettings = new SerializedObject(stats);
                 var speed = statsSettings.FindProperty("attackSpeed");
                 speed.floatValue = CombatStatsDefinition.ValidAttackSpeed(speed.floatValue);
+                var awareness = statsSettings.FindProperty("awareness");
+                awareness.intValue = CombatStatsDefinition.ValidAwareness(awareness.intValue);
                 statsSettings.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(stats);
                 // Save only these stats assets, preserving unrelated unsaved Editor assets.
@@ -81,6 +84,7 @@ namespace RaidCommander.EditorTools
                 serialized.FindProperty("combat").objectReferenceValue = combat;
                 serialized.FindProperty("boss").objectReferenceValue = boss;
                 serialized.FindProperty("tank").objectReferenceValue = tank;
+                serialized.FindProperty("decisionLog").objectReferenceValue = decisionLog;
                 var allies = serialized.FindProperty("party");
                 allies.arraySize = party.Length;
                 for (int i = 0; i < party.Length; i++) allies.GetArrayElementAtIndex(i).objectReferenceValue = party[i];

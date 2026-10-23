@@ -18,3 +18,4 @@ MonoBehaviour:
   meleeRange: 2.5
   rangedRange: 4
   attackSpeed: 0.5
+  awareness: 5

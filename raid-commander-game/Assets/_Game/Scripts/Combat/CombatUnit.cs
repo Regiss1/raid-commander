@@ -18,6 +18,7 @@ namespace RaidCommander.Combat
         [SerializeField, Min(0f)] private float fallbackMeleeRange = 2.5f;
         [SerializeField, Min(0f)] private float fallbackRangedRange = 18f;
         [SerializeField, Min(0.01f)] private float fallbackAttackSpeed = 1f;
+        [SerializeField, Range(1, 10)] private int fallbackAwareness = 5;
         private int maximumHealth;
         private bool healthInitialized;
 
@@ -31,6 +32,7 @@ namespace RaidCommander.Combat
         public float MeleeRange => stats != null ? stats.MeleeRange : fallbackMeleeRange;
         public float RangedRange => stats != null ? stats.RangedRange : fallbackRangedRange;
         public float AttackSpeed => stats != null ? stats.AttackSpeed : CombatStatsDefinition.ValidAttackSpeed(fallbackAttackSpeed);
+        public int Awareness => stats != null ? stats.Awareness : CombatStatsDefinition.ValidAwareness(fallbackAwareness);
         public CombatUnit CurrentTarget { get; private set; }
         public bool FacingLocked { get; set; }
         public event Action<CombatUnit> Died;

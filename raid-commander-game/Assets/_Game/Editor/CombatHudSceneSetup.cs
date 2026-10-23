@@ -1,6 +1,7 @@
 using RaidCommander.Combat;
 using RaidCommander.Selection;
 using RaidCommander.UI;
+using RaidCommander.Units;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -66,6 +67,8 @@ namespace RaidCommander.EditorTools
                 party.GetArrayElementAtIndex(i).objectReferenceValue = Need(scene, names[i]).GetComponent<CombatUnit>();
             settings.FindProperty("boss").objectReferenceValue = Need(scene, "Raid Boss").GetComponent<CombatUnit>();
             settings.FindProperty("log").objectReferenceValue = Need(scene, "Combat Services").GetComponent<CombatLogService>();
+            CombatSystem combat = Need(scene, "Combat Services").GetComponent<CombatSystem>();
+            settings.FindProperty("decisions").objectReferenceValue = DecisionLogSceneSetup.Ensure(scene, combat);
             settings.FindProperty("actions").objectReferenceValue = Need(scene, "Combat Debug Panel").GetComponent<CombatDebugActions>();
             settings.FindProperty("controls").objectReferenceValue = Controls();
             settings.ApplyModifiedPropertiesWithoutUndo();

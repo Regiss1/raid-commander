@@ -1,4 +1,4 @@
-# Autonomous party AI v1.2
+# Autonomous party AI v1.3
 
 **Status:** implemented
 
@@ -14,6 +14,7 @@ Four independent party role components produce navigation and combat requests fo
 - Blocked sight causes units to seek reachable positions around arena obstacles. AI melee also requires clear sight; trusted debug melee retains its existing behavior. Distances and sight use XZ; navigation resolves elevation from the NavMesh.
 - Manual movement owns positioning temporarily. Valid attacks/heals continue while moving. Autonomous positioning resumes after completion, cancellation or failure. Selection changes do not interrupt other units.
 - T8 adds pending-hazard escape to all roles and a retreat toward the living Tank for non-Tanks actively chased by the non-casting boss. Priority is death/inactive encounter, manual movement, escape, Tank retreat, normal positioning. Valid combat continues independently of these reactions. Escape accounts for agent clearance; normal position candidates and paths must avoid pending hazards. `NoSafeExit` exposes an unavailable escape without taking manual ownership.
+- T10 gives every party member Awareness 1–10, initially 5 in the four existing stats assets. On first eligible entry into a pending telegraph, and every 0.5 scaled game-time seconds after failed checks, one 1–10 roll succeeds at or below Awareness. One overlapping exposure produces one check stream. Success commits the member to safe-exit attempts until clear; blocked exits retry without another roll. Failed checks leave ordinary role/combat decisions active, including preventive path avoidance. A player movement order clears commitment, suppresses checks while active, and causes a fresh immediate check if the member remains exposed afterward.
 - The boss now moves and attacks at its separate three-second interval, initially choosing the closest party unit and acquiring Tank after positive Tank damage. Its targeting, cast locks and navigation are owned by the boss feature.
 - Boss death leaves party AI idle. Existing manual movement and debug health/log reset remain available. Reset revives units and re-arms decisions; it does not add an encounter-result screen.
 - Disabling the boss combat object also pauses party actions and autonomous positioning; reactivation reevaluates current role/reaction conditions.
@@ -23,6 +24,7 @@ Four independent party role components produce navigation and combat requests fo
 ## Implementation
 
 - `PartyRoleBrain` owns role/patient decisions using assigned encounter references rather than global target searches. Decisions run every 0.2 seconds and position searches at most every 0.8 seconds per unit. Successful offensive actions use per-frame stat-derived scheduling independently of decision frequency; failed action/sight attempts retry with the decision cadence. Each success schedules from current game time, avoiding banked bursts. Basic healing still uses the existing serialized `actionInterval` (1.5 seconds), whose Inspector tooltip now identifies its healing-only purpose. Preferred spacing, safety and decision/search intervals remain tunable.
+- `AwarenessReaction` owns per-member check timing, exposure, manual suppression and escape commitment. `PartyRoleBrain` supplies current `CombatUnit.Awareness`, pending-footprint containment and a replaceable integer roll source; its existing NavMesh reaction path performs retries after detection. Checks do not alter the independent attack/heal timer. Optional `DecisionLogService` observation records checks and distinct escape/suppression outcomes without controlling movement. The T10 Play-mode runner uses scripted rolls and runtime-only fixtures; T8's earlier unconditional-escape fixture now explicitly forces successful rolls.
 - `CombatStatsDefinition.AttackSpeed` and `CombatUnit.AttackSpeed` share value validation: nonpositive/nonfinite input falls back to 1; small positive values clamp to 0.01 to keep reciprocal intervals finite. A statless unit has a serialized fallback of 1. At most one automated action is issued per frame; very high requested rates remain limited by player frame rate.
 - `CombatPositionSearch` checks 48 positions across three target-centered rings. Candidates must sample onto the matching NavMesh, be within action range, have clear sight and admit a complete path. Path length, preferred spacing and boss safety rank candidates. Failed searches report `NoReachablePosition` and retry without taking manual movement ownership.
 - `UnitMovement.TryMove(..., Autonomous)` remains the path executor. Brains only cancel autonomous paths. Existing unit passability, selection colliders and navigation exclusions remain in effect.
@@ -36,6 +38,8 @@ Four independent party role components produce navigation and combat requests fo
 ## Source files
 
 - `raid-commander-game/Assets/_Game/Scripts/Units/PartyRoleBrain.cs`
+- `raid-commander-game/Assets/_Game/Scripts/Units/AwarenessReaction.cs`
+- `raid-commander-game/Assets/_Game/Scripts/Units/DecisionLogService.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Units/BossBasicAttack.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Units/CombatPositionSearch.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Movement/UnitMovement.cs`
@@ -48,13 +52,14 @@ Four independent party role components produce navigation and combat requests fo
 - `raid-commander-game/Assets/_Game/Editor/CombatSceneSetup.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/PartyAiVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/AttackSpeedVerification.cs`
+- `raid-commander-game/Assets/_Game/Tests/Editor/AwarenessVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/CombatVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/MovementVerification.cs`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArena.unity`
 
 ## Current scope
 
-One fixed encounter with four party roles, a mobile boss, [Wall of Flames and reactive positioning](boss-abilities-and-hazards.md), baked navigation, data-driven party attack speed, separate healing/boss timing, obstacle sight recovery, manual positioning priority, and debug state/floor controls. Protection preserves hit damage reporting independently of actual health loss. The toggle lasts for the Play session and remains enabled across health/log reset until toggled off or Play mode ends.
+One fixed encounter with four party roles, a mobile boss, [Wall of Flames and reactive positioning](boss-abilities-and-hazards.md), baked navigation, data-driven party attack speed and Awareness, separate healing/boss timing, obstacle sight recovery, manual positioning priority, and debug state/floor controls. Awareness gates escape only after a member is already inside a pending footprint; preventive autonomous path avoidance remains unconditional. Protection preserves hit damage reporting independently of actual health loss. The toggle lasts for the Play session and remains enabled across health/log reset until toggled off or Play mode ends.
 
 Threat tables, advanced formations, manual spells/projectiles, victory/defeat screens, a new restart flow and dynamic navigation rebaking are excluded. T8's bounded boss-targeting and ability scope is documented separately. Bounded position sampling does not guarantee solutions for arbitrary layouts or prove that no firing position exists. Existing combat ranges/stats remain authoritative. Earlier verification entries below/above describe their original T7/T7.1 checkpoints; T8 supersedes stationary boss timing.
 
@@ -62,10 +67,13 @@ Run **Raid Commander > Configure Autonomous Party AI** for AI-only current-scene
 
 **Verify Protected Combat and Attack Speed in Play Mode** invokes the combined T7/T7.1 runner, including its focused attack-speed checks. It restores runtime stats copies and all temporary health/position state before exiting Play mode.
 
+T10's `AwarenessVerification` Play-mode runner passed deterministic boundary and 0.5-second timing checks, all-role exposure and overlap integration, blocked-exit recovery, manual suppression and reset checks. The existing `PartyAiVerification` regression runner also passed after T10.
+
 ## Revisions
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v1.3 | 2026-10-22 | Added per-party Awareness checks, scaled retry timing, committed escape, manual suppression and deterministic T10 Play-mode coverage while preserving preventive path safety. |
 | v1.2 | 2026-10-21 | Added all-role pending-hazard escape, chase retreat toward Tank, safe candidate/path filtering and explicit reaction states while preserving manual priority and stat-derived combat; integrated T8's mobile boss. |
 | v1.1 | 2026-10-20 | Kept attacks/logs/tracers active at protected one health; added party attack-speed stats and independent per-frame offensive scheduling, preserving healing/boss/debug timing; passed protected-combat and 0.5/1/2/7 APS integration checks. |
 | v1.0 | 2026-10-20 | Added four role brains, bounded navigation/sight positioning, stationary boss attacks, manual priority with continuing combat, self-healing, state debugging and the boss damage floor; passed focused Play-mode integration checks. |

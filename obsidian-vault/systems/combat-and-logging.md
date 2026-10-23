@@ -1,10 +1,12 @@
-# Combat and event logging v1.9
+# Combat and event logging v2.0
 
 **Status:** implemented
 
 ## Overview
 
 Combat units own health, faction, stable encounter identifiers, target references, and configurable basic combat values. `CombatSystem` validates requests, applies health changes, and publishes resolved outcomes. `CombatLogService` records outcomes for the current encounter without affecting gameplay.
+
+T10 adds a separate optional decision recorder for Awareness checks and escape outcomes. Those entries are observations of party AI, not combat resolutions.
 
 Reactive presentation, boss numerical values and outlined text are documented in [Reactive health bars](health-bars.md).
 
@@ -18,6 +20,7 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - The cyan Ranged DPS starts alongside the party with 100 health, 20 damage and 18-unit range, using existing movement at speed 4.5.
 - A dead unit cannot attack or heal; its movement order is cancelled, its movement executor is disabled, and its NavMeshAgent is stopped.
 - The normal combat HUD shows a scrollable live event history. In the Editor, **Raid Commander > UI > Show Combat Debug** replaces the log with scrollable actions, feedback, AI state and history; F8 no longer toggles it. Player builds show the normal log only.
+- The Combat and Decisions tabs keep their own bounded histories. Awareness checks record the current integer stat, chance, actual roll and result; escape starts, blocked exits and manual suppression have separate outcome entries. Reset clears both histories. See [Combat HUD](combat-hud.md) for presentation.
 
 ## Implementation
 
@@ -27,11 +30,13 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - The debug panel shows each unit's AI state/target. **Keep Boss Alive (minimum 1 HP)** defaults off. `ApplyDamage` separates reported damage from health loss for the protected debug-boss target: a valid hit reports its full requested damage while resulting boss health stays at least one, including repeated hits at one health and debug kill. Protected hits cannot publish a death event. Without protection, reported damage remains effective health loss and lethal hits retain normal damage/death ordering. The toggle persists across health/log reset, does not revive a dead boss, and resets when Play mode ends.
 - `TryMeleeAttack` and `TryRangedAttack` retain their existing call forms and add reported-damage output overloads. Debug feedback uses the resolved amount instead of subtracting boss health, so protected hits report normal damage and protected debug kill explains the surviving boss. Successful protected ranged outcomes continue driving the existing independent tracer. No artificial health-change event is emitted when a protected hit causes zero health loss.
 - Party stats and `CombatUnit` expose attacks per second, defaulting to 1 with a statless fallback. Nonpositive/nonfinite values fall back to 1 and tiny positives clamp to 0.01. Only party automation schedules attacks from this value; normal debug combat calls remain immediate. Healer healing and boss timing retain separate intervals, with T8 setting boss swings to three seconds. See the dedicated [AI note](autonomous-party-ai.md).
+- The same stats asset now holds integer Awareness 1–10. Four party assets start at 5; `CombatUnit` reads the validated current value and supplies a statless fallback of 5. Reapplying setup preserves valid authored Awareness and existing balance fields. The boss has no Awareness decision producer.
 
 - `CombatUnit` stores faction, encounter ID, runtime health, target, and basic values. Stats supply initial maximum health; `SetMaximumHealth` preserves current health, clamps it to the cap and publishes `HealthChanged`. The component has no UI references. `CombatSceneSetup` creates and assigns per-unit `CombatStatsDefinition` ScriptableObject assets.
 - `CombatSystem` validates faction, range, and alive state, applies health changes, then notifies C# event subscribers and its optional log service. Damage amounts are effective health loss in ordinary combat and normal hit damage while debug boss protection is active. Logging is optional and has no gameplay callbacks.
 - `CombatLogEntry` is an immutable value type containing encounter-local sequence, elapsed session time, event type, stable IDs, resolved amounts, optional spell ID, and flags. Damage retains the documented protected-boss exception; healing remains effective restored health. Runtime publishes basic damage/healing/death and T8's cast lifecycle/spell damage; other schema types remain future work. `RangedDamage` is appended to preserve previous enum values.
 - `CombatLogService` stores up to 1,000 entries by default, removes the oldest at capacity, exposes read-only history, and resets sequence and timestamp origin for a new session.
+- `DecisionLogService` separately stores up to 1,000 immutable `DecisionLogEntry` snapshots, with sequence, aligned encounter elapsed time, stable member ID/name, captured cast identities and check/outcome fields. It listens to the existing combat-session reset, exposes read-only history and entry/reset notifications, and never feeds a decision back into combat or movement. It is optional; disabling it does not affect Awareness or escape.
 - Party world bars and screen frames are presentation-only. The boss health bar is a fixed screen-space HUD that subscribes to the boss unit's health changes. `CombatHud` resolves stable IDs from its scene references and formats existing history in chronological order. Debug actions report effective results or common rejection reasons; the Boss-to-Tank action submits damage through `CombatSystem` so the heal button can be exercised without implementing autonomous boss behavior.
 - `CombatLogService.SessionReset` notifies presentation after clearing bounded encounter history; the normal and Editor views share that one service. See [Combat HUD](combat-hud.md) for layout and follow/scroll behavior.
 - `CombatSystem.TryRangedAttack` accepts distinct living opponents within the source's `RangedRange` and with clear sight, faces the target and uses `ApplyDamage` with `BasicDamage`. Successful resolved damage publishes `RangedDamage`, followed by `UnitDied` when lethal. Protected boss hits retain normal damage/tracer outcomes without death. Invalid/dead/out-of-range/obstructed requests produce neither damage nor events.
@@ -45,6 +50,8 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatStatsDefinition.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatLogEntry.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatLogService.cs`
+- `raid-commander-game/Assets/_Game/Scripts/Units/DecisionLogEntry.cs`
+- `raid-commander-game/Assets/_Game/Scripts/Units/DecisionLogService.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatUnit.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatSystem.cs`
 - `raid-commander-game/Assets/_Game/Scripts/Combat/CombatLineOfSight.cs`
@@ -55,10 +62,12 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - `raid-commander-game/Assets/_Game/Scripts/UI/CombatHud.cs`
 - `raid-commander-game/Assets/_Game/Scripts/UI/ScreenBossHealthBar.cs`
 - `raid-commander-game/Assets/_Game/Editor/CombatSceneSetup.cs`
+- `raid-commander-game/Assets/_Game/Editor/DecisionLogSceneSetup.cs`
 - `raid-commander-game/Assets/_Game/Editor/RangedDpsSceneSetup.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/CombatVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/RangedDpsVerification.cs`
 - `raid-commander-game/Assets/_Game/Tests/Editor/LineOfSightVerification.cs`
+- `raid-commander-game/Assets/_Game/Tests/Editor/AwarenessVerification.cs`
 - `raid-commander-game/Assets/_Game/Scenes/RaidArena.unity`
 - `raid-commander-game/Assets/_Game/Data/BaseGame/Units/TankCombatStats.asset`
 - `raid-commander-game/Assets/_Game/Data/BaseGame/Units/HealerCombatStats.asset`
@@ -69,6 +78,10 @@ Reactive presentation, boss numerical values and outlined text are documented in
 - `raid-commander-game/Assets/_Game/Data/BaseGame/Units/BossCombatStats.asset`
 
 ## Current scope
+
+Awareness is a party stat used by autonomous telegraph reactions; decision history is a separate in-memory observation stream. It does not add a damage type, combat event, ability, stat editor or persistence.
+
+T10's Play-mode runner passed immutable entry snapshots, bounded eviction at a reduced fixture limit, independent combat/decision history and encounter reset checks. The saved arena and repeatable Editor setup contain one decision recorder; the four party brains and HUD reference it. The runner exits Play mode and leaves the recorder available for ordinary encounters.
 
 Basic resolved melee/ranged damage, targeted/self healing, obstacle-footprint sight checks, health capping, death, target/faction checks, planar range, facing, health presentation, and in-memory event logging are implemented. T8 adds bounded casts/ground AoE and spell identity through the existing pipeline; see the boss note. There is no right-click attack, physics projectile, height-aware/partial cover, armor, critical calculation, shields, periodic effects, encounter result flow, or persistence. Use **Raid Commander > Configure Combat and Logging** for full combat setup, **Configure Autonomous Party AI** for current encounter wiring, and **Verify Combat Line of Sight in Play Mode** for the combined combat, reactive health, ranged and sight suite. The Editor debug controls are reached through the UI menu.
 
@@ -84,6 +97,7 @@ Unity Pipeline `0.8.0-exp.1` supports this workflow from Codex CLI. In a restric
 
 | Version | Date (YYYY-MM-DD) | Summary |
 |---|---|---|
+| v2.0 | 2026-10-22 | Added Awareness stat access and a separate bounded decision recorder aligned to combat-session timing/reset, preserving combat event semantics. |
 | v1.9 | 2026-10-21 | Added log reset notification and moved history/debug presentation into the responsive combat HUD, with Editor-only menu access. |
 | v1.8 | 2026-10-21 | Activated cast lifecycle/spell damage through the central resolver, propagated spell identity to lethal outcomes, protected locked caster facing and displayed spell IDs; retained normal/protected damage semantics. |
 | v1.7 | 2026-10-20 | Separated protected hit damage from health loss so damage events/logs/tracers continue at one boss health; exposed resolved amounts for accurate debug feedback and added validated party attack-speed stats/fallbacks. |
