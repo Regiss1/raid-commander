@@ -16,6 +16,7 @@ This vault holds project context, design notes, architecture planning, and devel
 - [Combat HUD](systems/combat-hud.md) documents selectable party frames, the live log, Editor debug swap, mocks, responsive layout and world-bar visibility.
 - [Camera controls](systems/camera-controls.md) documents orthographic pan and zoom, including HUD wheel isolation.
 - `prompts/tasks/` contains task prompts and implementation planning.
+- [Game development task request form](prompts/game-development-task-request-form.md) helps collect a bounded request before drafting a numbered task.
 - [Task implementation workflow](structure/task-workflow.md) defines task identity, revision planning, GitHub issue status, local review, and approval before commit, push, and completion.
 - `AGENTS.md` records practices for maintaining this vault.
 
