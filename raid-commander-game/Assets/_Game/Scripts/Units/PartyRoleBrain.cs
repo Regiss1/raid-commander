@@ -28,6 +28,11 @@ namespace RaidCommander.Units
         [SerializeField, Min(0.2f)] private float positionSearchInterval = 0.8f;
         [SerializeField, Min(0f)] private float preferredDistance = 12f;
         [SerializeField, Min(0f)] private float safeBossDistance = 6f;
+        [SerializeField, Range(20f, 80f)] private float meleeRearHalfAngle = 60f;
+        [SerializeField, Min(0.1f)] private float meleeRangeInset = 0.35f;
+        [SerializeField, Min(0.05f)] private float meleeHoldTolerance = 0.3f;
+        [SerializeField, Min(0f)] private float meleeBodyMargin = 0.15f;
+        [SerializeField, Min(0.05f)] private float meleeRepathThreshold = 0.6f;
         private CombatUnit unit;
         private UnitMovement movement;
         private NavMeshAgent agent;
@@ -146,6 +151,7 @@ namespace RaidCommander.Units
 
             // Manual movement owns positioning only. TryAct still runs independently each frame.
             if (ReactToEncounter()) return;
+            if (role == CombatRole.MeleeDps) { DecideMeleePosition(range); return; }
 
             float desired = healing || role == CombatRole.RangedDps ? Mathf.Min(preferredDistance, range * 0.8f) : range * 0.75f;
             bool tooClose = healing ? CombatPositionSearch.PlanarDistance(transform.position, boss.transform.position) < safeBossDistance
@@ -174,6 +180,37 @@ namespace RaidCommander.Units
             if (movement.State == MovementState.Moving && movement.Source == MovementSource.Autonomous
                 && CombatPositionSearch.PlanarDistance(movement.Destination, destination) < 0.75f) return;
             if (movement.TryMove(destination, MovementSource.Autonomous) != MoveResult.Accepted)
+                State = RoleState.NoReachablePosition;
+        }
+
+        private void DecideMeleePosition(float range)
+        {
+            if (MeleeDpsPositionSearch.IsAcceptableRear(agent, combat, boss, tank, hazards, range,
+                meleeRearHalfAngle, meleeRangeInset, meleeHoldTolerance, meleeBodyMargin))
+            {
+                StopAutonomousMove(); State = RoleState.Fighting; return;
+            }
+            if (Time.time < nextPositionSearch)
+            {
+                if (State != RoleState.NoReachablePosition) State = RoleState.SeekingPosition;
+                return;
+            }
+            nextPositionSearch = Time.time + positionSearchInterval;
+            State = RoleState.SeekingPosition;
+            if (!MeleeDpsPositionSearch.TryFind(agent, combat, boss, tank, hazards, range,
+                meleeRearHalfAngle, meleeRangeInset, meleeBodyMargin, out MeleePositionPlan plan))
+            {
+                StopAutonomousMove(); State = RoleState.NoReachablePosition; return;
+            }
+            if (CombatPositionSearch.PlanarDistance(transform.position, plan.Destination) <= 0.2f
+                && CombatPositionSearch.PlanarDistance(transform.position, plan.FinalDestination) <= 0.2f)
+            {
+                StopAutonomousMove(); State = RoleState.Fighting; return;
+            }
+            if (movement.State == MovementState.Moving && movement.Source == MovementSource.Autonomous
+                && CombatPositionSearch.PlanarDistance(movement.Destination, plan.Destination) < meleeRepathThreshold)
+                return;
+            if (movement.TryMove(plan.Destination, MovementSource.Autonomous) != MoveResult.Accepted)
                 State = RoleState.NoReachablePosition;
         }
 

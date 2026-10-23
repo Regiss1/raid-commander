@@ -21,6 +21,7 @@
 - [x] Implement direct movement orders using 3D raycasts and NavMesh, with temporary markers and explicit command completion.
 - [x] Implement four autonomous roles, Tank-first healing/self-healing, obstacle sight recovery and stationary boss attacks; verify manual overrides with continuing combat/resume, independent units and an unattended boss kill (T7; requester approved).
 - [x] Keep protected boss hits/logging active at one health and add party attack-speed stats for automated attacks, preserving separate healing/boss timing and immediate debug actions; verify 0.5/1/2/7 APS and protected hit continuity (T7.1; requester approved).
+- [x] Add Melee DPS rear-sector positioning with safe side/front fallback, body-clearance preference and unchanged manual/reactive priorities; verify saved-scene integration and focused Play-mode behavior (T7.2; requester approved).
 - [x] Configure the arena with basic health, melee attacks, healing, and combat event logging.
 - [x] Run combat verification in Play mode.
 - [x] Add reactive party and boss health bars, outlined boss health values, and verify notifications and responsive layouts.

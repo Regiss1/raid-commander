@@ -851,6 +851,11 @@ MonoBehaviour:
   positionSearchInterval: 0.8
   preferredDistance: 0
   safeBossDistance: 6
+  meleeRearHalfAngle: 60
+  meleeRangeInset: 0.35
+  meleeHoldTolerance: 0.3
+  meleeBodyMargin: 0.15
+  meleeRepathThreshold: 0.6
 --- !u!1 &381147676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1966,6 +1971,11 @@ MonoBehaviour:
   positionSearchInterval: 0.8
   preferredDistance: 12
   safeBossDistance: 6
+  meleeRearHalfAngle: 60
+  meleeRangeInset: 0.35
+  meleeHoldTolerance: 0.3
+  meleeBodyMargin: 0.15
+  meleeRepathThreshold: 0.6
 --- !u!1 &616637961
 GameObject:
   m_ObjectHideFlags: 0
@@ -3312,6 +3322,11 @@ MonoBehaviour:
   positionSearchInterval: 0.8
   preferredDistance: 12
   safeBossDistance: 6
+  meleeRearHalfAngle: 60
+  meleeRangeInset: 0.35
+  meleeHoldTolerance: 0.3
+  meleeBodyMargin: 0.15
+  meleeRepathThreshold: 0.6
 --- !u!1 &1079762253
 GameObject:
   m_ObjectHideFlags: 0
@@ -4890,6 +4905,11 @@ MonoBehaviour:
   positionSearchInterval: 0.8
   preferredDistance: 0
   safeBossDistance: 6
+  meleeRearHalfAngle: 60
+  meleeRangeInset: 0.35
+  meleeHoldTolerance: 0.3
+  meleeBodyMargin: 0.15
+  meleeRepathThreshold: 0.6
 --- !u!1 &1695966608
 GameObject:
   m_ObjectHideFlags: 0

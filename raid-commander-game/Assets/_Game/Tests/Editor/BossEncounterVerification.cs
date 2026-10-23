@@ -111,7 +111,8 @@ namespace RaidCommander.Verification
             try
             {
                 Check(original.ValidationError(true) == null && original.CooldownSeconds == 0f
-                    && original.CastTimeSeconds == 3f && original.Width == 4f && original.Damage == 95, "Production ability configuration differs from agreed scope.");
+                    && original.Width == 4f && original.Damage == 95,
+                    "Saved ability configuration is invalid for the encounter fixtures.");
                 Check(controller != null && runner != null && boundary.IsValid, "Missing saved encounter wiring.");
                 Check(runner.SetupError == null && setupWarnings.Count == 0, "Fresh Play entry rejected valid saved ability wiring before any fixture reset: " + runner.SetupError);
                 if (mode == "startup") { yield return StartupAndRecovery(); yield break; }

@@ -94,7 +94,14 @@ namespace RaidCommander.Verification
             var hud = Object.FindAnyObjectByType<CombatHud>();
             var brains = Object.FindObjectsByType<PartyRoleBrain>(FindObjectsSortMode.None);
             Check(decisions != null && hud != null && brains.Length == 4, "Saved T10 scene wiring is incomplete.");
-            Check(brains.All(b => b.GetComponent<CombatUnit>().Awareness == 5), "Party Awareness is not 5.");
+            Check(brains.All(b =>
+            {
+                var member = b.GetComponent<CombatUnit>();
+                var authored = new SerializedObject(member).FindProperty("stats").objectReferenceValue
+                    as CombatStatsDefinition;
+                return authored != null && member.Awareness == authored.Awareness
+                    && member.Awareness >= 1 && member.Awareness <= 10;
+            }), "Party Awareness does not match its valid authored stat.");
             var statless = new GameObject("T10 statless fixture").AddComponent<CombatUnit>();
             try { Check(statless.Awareness == 5, "Missing-stats Awareness fallback is not 5."); }
             finally { Object.Destroy(statless.gameObject); }

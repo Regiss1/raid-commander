@@ -89,8 +89,23 @@ namespace RaidCommander.EditorTools
                 allies.arraySize = party.Length;
                 for (int i = 0; i < party.Length; i++) allies.GetArrayElementAtIndex(i).objectReferenceValue = party[i];
                 if (created) serialized.FindProperty("preferredDistance").floatValue = distance;
+                if (role == CombatRole.MeleeDps)
+                {
+                    SetIfMissing("meleeRearHalfAngle", 60f);
+                    SetIfMissing("meleeRangeInset", 0.35f);
+                    SetIfMissing("meleeHoldTolerance", 0.3f);
+                    SetIfMissing("meleeBodyMargin", 0.15f, true);
+                    SetIfMissing("meleeRepathThreshold", 0.6f);
+                }
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(brain);
+
+                void SetIfMissing(string propertyName, float value, bool zeroAllowed = false)
+                {
+                    var property = serialized.FindProperty(propertyName);
+                    if (created || (zeroAllowed ? property.floatValue < 0f : property.floatValue <= 0f))
+                        property.floatValue = value;
+                }
             }
         }
     }
